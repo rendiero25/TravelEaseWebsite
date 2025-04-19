@@ -1,6 +1,14 @@
+import {BrowserRouter, Routes, Route } from "react-router-dom";
+
+import Index from "./pages/Index.jsx";
+
 const App = () => {
     return(
-        <div></div>
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<Index />} />
+            </Routes>
+        </BrowserRouter>
     )
 }
 
