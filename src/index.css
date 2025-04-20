@@ -3,6 +3,7 @@
 @theme {
     --font-primary: "Nunito", sans-serif;
 
+    --color-primary: #F8616C;
     --color-black: #1E1E1E;
 
     --breakpoint-2xl: 85.5rem; /*1366*/

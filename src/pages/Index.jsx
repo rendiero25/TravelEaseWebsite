@@ -3,8 +3,8 @@ import Hero from "../components/Hero.jsx";
 
 const Index = () => {
     return(
-        <div>
-            <div className="min-h-screen relative">
+        <div className="p-0 m-0 box-border font-primary">
+            <div className="min-h-screen flex">
                 <Header/>
                 <Hero />
             </div>

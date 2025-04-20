@@ -22,13 +22,14 @@ const Header = () => {
     const toggleMobileMenu = () => {setMobileMenu(true)};
 
     return(
-        <div className="px-6 xl:px-56 py-2 w-full bg-transparent absolute top-0 border-b-[0.03rem] border-white/25 flex justify-between items-center">
+        <div className="px-6 xl:px-22 3xl:px-42 4xl:px-80 py-2 w-full bg-transparent absolute top-0 border-b-[0.03rem] border-white/25 flex justify-between items-center">
             <div className="w-50vw flex flex-row justify-between items-center gap-18">
                 <div className="">
-                    <img src={Logo} alt="logo-travelease" className="w-1/4 xl:w-[6rem]"/>
+                    <img src={Logo} alt="logo-travelease" className="w-1/2 sm:w-1/3 xl:w-[9rem]"/>
                 </div>
-                <div className="hidden xl:flex w-40vw flex flex-row justify-between items-center gap-8">
-                    <Button onClick={toHome} variant="text" sx={{color:"white", textTransform:"none", fontWeight:"400", fontSize:"15px"}}>Home</Button>
+
+                <div className="hidden xl:flex w-40vw flex-row justify-between items-center gap-8">
+                    <Button onClick={toHome} variant="text" sx={{color:"white", textTransform:"none", fontWeight:"400", fontSize:"14px"}}>Home</Button>
                     <Button onClick={toActivities} variant="text" sx={{color:"white", textTransform:"none", fontWeight:"400", fontSize:"14px"}}>Activities</Button>
                     <Button onClick={toPromotions} variant="text" sx={{color:"white", textTransform:"none", fontWeight:"400", fontSize:"14px"}}>Promotions</Button>
                 </div>
@@ -38,13 +39,13 @@ const Header = () => {
                 <Button onClick={toggleMobileMenu} className="flex">
                     <BiMenuAltRight className="size-8 text-white -mr-11"/>
                 </Button>
-
-                {mobileMenu && (
-                    <div className="absolute top-10 right-0 z-50">
-                        <MobileMenu toogleCloseMenu={!toggleMobileMenu}/>
-                    </div>
-                )}
             </div>
+
+            {mobileMenu && (
+                <div className="absolute top-0 right-0 z-50 w-full">
+                    <MobileMenu toogleCloseMenu={() => setMobileMenu(false)}/>
+                </div>
+            )}
 
             <div className="hidden xl:flex flex-row justify-between items-center gap-4">
                 <div className="flex flex-row justify-between items-center gap-2">
