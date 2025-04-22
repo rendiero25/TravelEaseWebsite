@@ -1,5 +1,6 @@
 import Header from "../components/Header.jsx";
 import Hero from "../components/Hero.jsx";
+import TopRatedExp from "../components/TopRatedExp.jsx";
 
 const Index = () => {
     return(
@@ -9,6 +10,7 @@ const Index = () => {
                 <Hero />
             </div>
 
+            <TopRatedExp />
         </div>
     )
 }

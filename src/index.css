@@ -6,6 +6,7 @@
     --color-primary: #F8616C;
     --color-secondary: #FF948D;
     --color-black: #1E1E1E;
+    --color-gray: #9c9b9b;
 
     --breakpoint-2xl: 85.5rem; /*1366*/
     --breakpoint-3xl: 96rem; /*1536*/
