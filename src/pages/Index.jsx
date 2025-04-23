@@ -16,8 +16,10 @@ const Index = () => {
             <div className="flex flex-col gap-50 4xl:gap-56">
                 <PromoDisc />
                 <Banner />
-                {/*<TopCategories />*/}
-                <TopActivities />
+                <div className="flex flex-col gap-25 -mt-32 sm:-mt-42 xl:-mt-28 4xl:-mt-46 5xl:-mt-48">
+                    <TopCategories />
+                    <TopActivities />
+                </div>
             </div>
         </div>
     )

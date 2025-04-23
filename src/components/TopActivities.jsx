@@ -6,9 +6,12 @@ import { Pagination, Autoplay } from "swiper/modules";
 import 'swiper/css';
 import 'swiper/css/pagination';
 
+import { BiCommentDots } from "react-icons/bi";
+import { BiStar } from "react-icons/bi";
+
 const TopActivities = () => {
 
-    const [banners, setBanners] = useState([]);
+    const [activities, setActivities] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -23,10 +26,10 @@ const TopActivities = () => {
                     }
                 };
 
-                const response = await axios.get("https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/banners", config);
-                const dataFromApi = response.data.data || [];
+                const response = await axios.get("https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/activities", config);
+                const dataFromApi = response.data.data.slice(0, 10);
 
-                setBanners(dataFromApi);
+                setActivities(dataFromApi);
                 setLoading(false);
             } catch (err) {
                 console.error("Failed to fetch banners data from API", err);
@@ -48,8 +51,8 @@ const TopActivities = () => {
     if (error) return <div>Error: {error}</div>;
 
     return(
-        <div className="px-6 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80 h-[42rem] sm:h-[41rem] xl:h-[40rem] 4xl:h-[47rem]">
-            <div className="flex flex-col justify-between items-start gap-4">
+        <div className="px-6 sm:px-12 xl:px-22 3xl:px-42 h-[42rem] sm:h-[41rem] xl:h-[40rem] 4xl:h-[47rem]">
+            <div className="flex flex-col justify-between items-start gap-4 4xl:px-38">
                 <h2 className="font-medium leading-normal text-4xl text-black">Top Trending Events</h2>
                 <div className="border-1 border-gray w-[2rem]"></div>
                 <p className="text-lg font-light text-gray">Discover unforgettable adventures with our exclusive offers!</p>
@@ -67,18 +70,49 @@ const TopActivities = () => {
                         pagination={{ clickable: true }}
                         breakpoints={{
                             1280: {
-                                slidesPerView: 3,
+                                slidesPerView: 5,
                                 spaceBetween: 35
                             },
                         }}>
 
-                        {banners.map((bannersdata) => (
-                            <SwiperSlide key={bannersdata.id}>
-                                <div className="py-10 pb-15 4xl:pb-20 justify-center items-center w-full">
-                                    <div className="relative flex justify-center items-center h-[27rem] 4xl:h-[30rem]">
-                                        <img src={bannersdata.imageUrl} alt="image" className="w-full h-full object-cover"/>
-                                        <div className="absolute z-10 w-full h-full flex flex-col gap-2 px-6 py-6 justify-end bg-black/55">
-                                            <h3 className="text-white font-normal text-3xl">{bannersdata.name}</h3>
+                        {activities.map((activitiesdata) => (
+                            <SwiperSlide key={activitiesdata.id}>
+                                <div className="mt-10 px-6 pb-15 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80 flex flex-col xl:flex-row justify-center items-start">
+                                    <div className="flex flex-col justify-between items-start gap-2">
+                                        <img src={activitiesdata.imageUrls[0]} alt="activities-image" className="w-full h-full object-cover"/>
+                                        <div className="w-full flex flex-col justify-between items-start gap-2">
+                                            <div className="flex flex-row justify-between items-center gap-1">
+                                                <BiStar className="size-4 text-yellow-500" />
+                                                <h4>{activitiesdata.rating}</h4>
+                                                <h4 className="text-md font-light text-black">Stars</h4>
+                                            </div>
+
+                                            <h3 className="font-normal text-3xl">{activitiesdata.title}</h3>
+
+                                            <div className="flex flex-row justify-between items-end w-full">
+                                                <div className="flex flex-col justify-between items-start">
+                                                    <div className="text-md font-light text-black">{activitiesdata.city}</div>
+                                                    <div className="text-md font-light text-gray">{activitiesdata.province}</div>
+                                                </div>
+                                                <div className="flex flex-row justify-between items-center gap-1">
+                                                    <BiCommentDots className="size-4 text-gray" />
+                                                    <div className="text-md font-light text-black">{activitiesdata.total_reviews}</div>
+                                                    <h4 className="text-md font-light text-black">Reviews</h4>
+                                                </div>
+                                            </div>
+
+                                            <div className="border-b-[0.03rem] border-black/10 w-full"></div>
+
+                                            <div className="flex flex-col justify-between items-start">
+                                                <div className="flex flex-row justify-between items-center gap-1">
+                                                    <h4 className="text-md font-light text-gray">Price</h4>
+                                                    <h4 className="text-md font-medium text-black">{activitiesdata.price}</h4>
+                                                </div>
+
+                                                <p className="text-md font-light text-gray overflow-hidden text-ellipsis line-clamp-3">{activitiesdata.description}</p>
+                                            </div>
+
+
                                         </div>
                                     </div>
                                 </div>
