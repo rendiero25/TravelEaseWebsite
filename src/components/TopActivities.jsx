@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Autoplay } from "swiper/modules";
+import {useNavigate} from "react-router-dom";
+
+import axios from "axios";
+import Button from '@mui/material/Button';
 
 import 'swiper/css';
 import 'swiper/css/pagination';
@@ -10,6 +13,9 @@ import { BiCommentDots } from "react-icons/bi";
 import { BiStar } from "react-icons/bi";
 
 const TopActivities = () => {
+
+    const navigate = useNavigate();
+    const toActivities = () => {navigate("/activities")}
 
     const [activities, setActivities] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -51,7 +57,7 @@ const TopActivities = () => {
     if (error) return <div>Error: {error}</div>;
 
     return(
-        <div className="px-6 sm:px-12 xl:px-22 3xl:px-42">
+        <div className="px-6 sm:px-12 xl:px-22 3xl:px-42 flex flex-col">
             <div className="flex flex-col justify-between items-start gap-4 4xl:px-38">
                 <h2 className="font-medium leading-normal text-4xl text-black">Top Trending Events</h2>
                 <div className="border-1 border-gray w-[2rem]"></div>
@@ -77,7 +83,7 @@ const TopActivities = () => {
 
                         {activities.map((activitiesdata) => (
                             <SwiperSlide key={activitiesdata.id}>
-                                <div className="mt-10 px-6 pb-15 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80 flex flex-col xl:flex-row justify-center items-start">
+                                <div className="mt-10 pb-15 flex flex-col xl:flex-row justify-center items-start">
                                     <div className="flex flex-col justify-between items-start gap-2">
                                         <img src={activitiesdata.imageUrls[0]} alt="activities-image" className="w-full h-full object-cover"/>
                                         <div className="w-full flex flex-col justify-between items-start gap-2">
@@ -92,7 +98,7 @@ const TopActivities = () => {
                                             <div className="flex flex-row justify-between items-end w-full">
                                                 <div className="flex flex-col justify-between items-start">
                                                     <div className="text-md font-light text-black">{activitiesdata.city}</div>
-                                                    <div className="text-md font-light text-gray">{activitiesdata.province}</div>
+                                                    <div className="text-md xl:text-sm font-light text-gray">{activitiesdata.province}</div>
                                                 </div>
                                                 <div className="flex flex-row justify-between items-center gap-1">
                                                     <BiCommentDots className="size-4 text-gray" />
@@ -121,6 +127,11 @@ const TopActivities = () => {
                     </Swiper>
                 </div>
             </div>
+
+            <div className="self-center mt-10">
+                <Button variant="text" onClick={toActivities} sx={{color:"#F8616C", fontSize:"16px", textTransform:"none"}}>View All Activities</Button>
+            </div>
+
         </div>
     )
 }

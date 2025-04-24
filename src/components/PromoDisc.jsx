@@ -53,7 +53,7 @@ const PromoDisc = () => {
 
     return(
         <div>
-            <div style={{backgroundImage: `url(${TopRatedExpBg})`}} className="relative pt-20 sm:pt-30 px-6 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80 h-[42rem] sm:h-[41rem] xl:h-[40rem] 4xl:h-[44rem]">
+            <div style={{backgroundImage: `url(${TopRatedExpBg})`, backgroundSize:"cover"}} className="relative pt-20 sm:pt-30 px-6 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80 h-[42rem] sm:h-[41rem] xl:h-[40rem] 4xl:h-[44rem]">
                 <div className="flex flex-col justify-between items-start gap-4 4xl:gap-8">
                     <h2 className="font-bold font-medium leading-normal text-4xl text-white">Explore, Make Dreams Come True</h2>
                     <div className="border-1 border-gray w-[2rem]"></div>

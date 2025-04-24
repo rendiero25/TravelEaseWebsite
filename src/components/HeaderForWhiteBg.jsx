@@ -4,7 +4,7 @@ import Button from '@mui/material/Button';
 
 import MobileMenu from "../components/MobileMenu.jsx";
 
-import Logo from "../assets/images/travelease-logo.png";
+import Logo from "../assets/images/travelease-redlogo.png";
 import { BiMenuAltRight } from "react-icons/bi";
 import { BiRightArrowCircle } from "react-icons/bi";
 import { BiUser } from "react-icons/bi";

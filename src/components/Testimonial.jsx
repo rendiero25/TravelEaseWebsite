@@ -8,12 +8,12 @@ import SarahJohnson from "../assets/images/sarahjohnson.jpg";
 
 const Testimonial = () => {
     return(
-        <div className="bg-gray/5 py-10 w-full px-6 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80 -mt-20 border-b-[0.03rem] border-black/10">
+        <div className="bg-gray/5 py-20 w-full px-6 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80 -mt-20 border-b-[0.03rem] border-black/10">
             <div className="flex flex-col justify-between items-start gap-8">
-                <div className="flex flex-col xl:flex-row justify-between items-start gap-4">
-                    <h2 className="font-medium leading-normal text-4xl text-black">People Talking About Us</h2>
+                <div className="flex flex-col justify-between items-start gap-4">
+                    <h2 className="font-medium leading-normal text-4xl text-black max-w-xs xl:w-full">People Talking About Us</h2>
                     <div className="border-1 border-gray w-[2rem]"></div>
-                    <p className="text-lg font-light text-gray">
+                    <p className="text-lg font-light text-gray xl:max-w-2xl">
                         Discover what our delighted travelers are saying about their transformative journeys and
                         exceptional experiences with our travel service.
                     </p>
