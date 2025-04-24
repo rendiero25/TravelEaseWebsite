@@ -51,7 +51,7 @@ const TopActivities = () => {
     if (error) return <div>Error: {error}</div>;
 
     return(
-        <div className="px-6 sm:px-12 xl:px-22 3xl:px-42 h-[42rem] sm:h-[41rem] xl:h-[40rem] 4xl:h-[47rem]">
+        <div className="px-6 sm:px-12 xl:px-22 3xl:px-42">
             <div className="flex flex-col justify-between items-start gap-4 4xl:px-38">
                 <h2 className="font-medium leading-normal text-4xl text-black">Top Trending Events</h2>
                 <div className="border-1 border-gray w-[2rem]"></div>

@@ -11,11 +11,11 @@ const MobileMenu = ({toogleCloseMenu}) => {
     const toHome = () => {navigate("/")};
     const toActivities = () => {navigate("/activities")};
     const toPromotions = () => {navigate("/promotions")};
-    const toSignIn = () => {navigate("/sign-in")};
+    const toLogin = () => {navigate("/login")};
     const toRegister = () => {navigate("/register")};
 
     return(
-        <div className="bg-gradient-to-b from-primary to-primary/50 px-6 py-6 flex flex-col justify-between items-start gap-8">
+        <div className="bg-primary/97 px-6 py-6 flex flex-col justify-between items-start gap-8 shadow-2xl">
             <div className="flex flex-row w-full justify-between items-center">
                 <h4 className="font-normal text-2xl text-white pl-2">travelease</h4>
                 <Button className="bg-blue-500">
@@ -30,7 +30,7 @@ const MobileMenu = ({toogleCloseMenu}) => {
             </div>
 
             <div className="flex flex-row justify-between items-center gap-6">
-                <Button onClick={toSignIn} variant="text" size="large" startIcon={<BiRightArrowCircle/>} style={{color:"white", fontWeight:"400", textTransform:"none", fontSize:"16px"}}>Sign In</Button>
+                <Button onClick={toLogin} variant="text" size="large" startIcon={<BiRightArrowCircle/>} style={{color:"white", fontWeight:"400", textTransform:"none", fontSize:"16px"}}>Sign In</Button>
                 <Button onClick={toRegister} variant="text" size="large" startIcon={<BiUser/>} style={{color:"white", fontWeight:"400", textTransform:"none", fontSize:"16px"}}>Register</Button>
             </div>
         </div>

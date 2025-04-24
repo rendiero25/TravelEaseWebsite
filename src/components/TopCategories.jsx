@@ -63,11 +63,9 @@ const TopCategories = () => {
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 ))}
             </div>
-
 
             {/*<div className="flex flex-col xl:flex-row xl:flex-wrap gap-4 w-full justify-center items-center">*/}
             {/*    {categories.map((categorydata) => (*/}
