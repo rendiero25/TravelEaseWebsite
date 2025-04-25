@@ -31,7 +31,7 @@ const Hero = () => {
                         </div>
 
                         <div className="py-8 w-full">
-                            <Button type="submit" variant="outlined" startIcon={<BiSearchAlt/>} style={{color:"#FF948D", fontWeight:"400", textTransform:"none", fontSize:"14px", borderWidth:"2px", borderColor:"#FF948D", borderRadius:"50px", padding:"8px 46px"}}>Search</Button>
+                            <Button type="submit" variant="outlined" startIcon={<BiSearchAlt/>} sx={{color:"#FF948D", fontWeight:"400", textTransform:"none", fontSize:"14px", borderWidth:"2px", borderColor:"#FF948D", borderRadius:"50px", padding:"8px 46px"}}>Search</Button>
                         </div>
                     </div>
                 </div>

@@ -12,14 +12,21 @@ import Logo from "../assets/images/travelease-logo.png";
 import RedLogo from "../assets/images/travelease-redlogo.png";
 import { BiMenuAltRight } from "react-icons/bi";
 import { BiRightArrowCircle } from "react-icons/bi";
+import { BiUser } from "react-icons/bi";
 // import { BiUser } from "react-icons/bi";
 // import { BiSolidDashboard } from "react-icons/bi";
 import { BiHappy } from "react-icons/bi";
+
+import { useAuth } from "../contexts/AuthContext";
+
 
 const Header = () => {
 
     const location = useLocation();
     const isHomePage = location.pathname === "/";
+
+    const { auth, logout } = useAuth();
+    console.log("user dari auth context:", auth.user);
 
     const navigate = useNavigate();
     const toHome = () => {navigate("/")};
@@ -34,22 +41,18 @@ const Header = () => {
     //DROPDOWN MENU FOR USER
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
-    const handleClick = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
+    const handleClick = (event) => {setAnchorEl(event.currentTarget);};
+    const handleClose = () => {setAnchorEl(null);};
 
     //DROPDOWN MENU FOR ADMIN
     const [anchorElAdmin, setAnchorElAdmin] = React.useState(null);
     const openAdmin = Boolean(anchorElAdmin);
-    const handleClickAdmin = (event) => {
-        setAnchorElAdmin(event.currentTarget);
-    };
-    const handleCloseAdmin = () => {
-        setAnchorElAdmin(null);
-    };
+    const handleClickAdmin = (event) => {setAnchorElAdmin(event.currentTarget);};
+    const handleCloseAdmin = () => {setAnchorElAdmin(null);};
+
+    const UserName = auth.user?.name || "";
+
+    console.log('state auth:', auth)
 
     return(
         <div className={`px-6 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80 py-2 w-full ${isHomePage ? "bg-transparent" : "bg-white"} ${isHomePage ? "absolute" : "relative"} top-0 border-b-[0.03rem] border-white/25 flex justify-between items-center ${isHomePage ? "shadow-none" : "shadow-2xl/10"}`}>
@@ -67,51 +70,56 @@ const Header = () => {
 
             <div className="w-50vw xl:hidden">
                 <Button onClick={toggleMobileMenu} className="flex">
-                    <BiMenuAltRight className="size-8 text-white -mr-11"/>
+                    <BiMenuAltRight className={`size-8 -mr-11 ${isHomePage ? "" : "text-primary"}`}/>
                 </Button>
             </div>
 
             {mobileMenu && (
                 <div className="absolute top-0 right-0 z-50 w-full">
-                    <MobileMenu toogleCloseMenu={() => setMobileMenu(false)}/>
+                    <MobileMenu toogleCloseMenu={() => setMobileMenu(false)} />
                 </div>
             )}
 
             <div className="hidden xl:flex flex-row justify-between items-center gap-4">
-                <div className="flex flex-row justify-between items-center gap-2">
-                    <Button onClick={toLogin} variant="text" startIcon={<BiRightArrowCircle/>} style={{color: isHomePage ? "white" : "#F8616C", fontWeight:"400", textTransform:"none", fontSize:"14px"}}>Sign In</Button>
-                    <Button onClick={toRegister} variant="text" startIcon={<BiHappy/>} style={{color: isHomePage ? "white" : "#F8616C", fontWeight:"400", textTransform:"none", fontSize:"14px"}}>Register</Button>
-                </div>
-
+                {(!auth.isLoggedIn) && (
+                    <div className="flex flex-row justify-between items-center gap-2">
+                        <Button onClick={toLogin} variant="text" startIcon={<BiRightArrowCircle/>} style={{color: isHomePage ? "white" : "#F8616C", fontWeight:"400", textTransform:"none", fontSize:"14px"}}>Sign In</Button>
+                        <Button onClick={toRegister} variant="text" startIcon={<BiHappy/>} style={{color: isHomePage ? "white" : "#F8616C", fontWeight:"400", textTransform:"none", fontSize:"14px"}}>Register</Button>
+                    </div>
+                )}
 
                 {/* DROPPDOWN MENU FOR USER */}
-                <div className="" id="dropdown-menu-user">
-                    <Button id="basic-button" aria-controls={open ? 'basic-menu' : undefined} aria-haspopup="true" aria-expanded={open ? 'true' : undefined} onClick={handleClick}
-                        style={{color: isHomePage ? "white" : "#F8616C", fontWeight:"400", textTransform:"none", fontSize:"14px"}}>
-                            nama-User
-                    </Button>
-                    <Menu id="basic-menu" anchorEl={anchorEl} open={open} onClose={handleClose} MenuListProps={{'aria-labelledby': 'basic-button',}}
-                        style={{color:"#F8616C", fontWeight:"400", textTransform:"none", fontSize:"14px"}}>
-                        <MenuItem onClick={handleClose}>Profile</MenuItem>
-                        <MenuItem onClick={handleClose}>Purchase List</MenuItem>
-                        <MenuItem onClick={handleClose}>Logout</MenuItem>
-                    </Menu>
-                </div>
+                {auth.isLoggedIn && auth.user?.role === "user" && (
+                    <div id="dropdown-menu-user">
+                        <Button id="basic-button" aria-controls={open ? 'basic-menu' : undefined} aria-haspopup="true" aria-expanded={open ? 'true' : undefined} onClick={handleClick} style={{color: isHomePage ? "white" : "#F8616C", fontWeight:"400", textTransform:"none", fontSize:"14px"}}>
+                            <div className="flex flex-row justify-between items-center gap-2">
+                                <div><BiUser /></div>
+                                {UserName || "User"}
+                            </div>
+                        </Button>
+
+                        <Menu id="basic-menu" anchorEl={anchorEl} open={open} onClose={handleClose} MenuListProps={{'aria-labelledby': 'basic-button',}}>
+                                <MenuItem onClick={handleClose}>Profile</MenuItem>
+                                <MenuItem onClick={handleClose}>Purchase List</MenuItem>
+                                <MenuItem onClick={() => {handleClose(); logout();}}>Logout</MenuItem>
+                        </Menu>
+                    </div>
+                )}
 
                 {/* DROPPDOWN MENU FOR ADMIN */}
-                <div className="" id="dropdown-menu-admin">
-                    <Button id="basic-button" aria-controls={openAdmin ? 'basic-menu' : undefined} aria-haspopup="true" aria-expanded={open ? 'true' : undefined} onClick={handleClickAdmin}
-                            style={{color: isHomePage ? "white" : "#F8616C", fontWeight:"400", textTransform:"none", fontSize:"14px"}}>
-                        nama-admin
-                    </Button>
+                {(auth.isLoggedIn && auth.user?.role === "admin") && (
+                    <div id="drop-down-admin">
+                        <Button id="basic-button-admin" aria-controls={openAdmin ? 'basic-menu-admin' : undefined} aria-haspopup="true" aria-expanded={openAdmin ? 'true' : undefined} onClick={handleClickAdmin} style={{color: isHomePage ? "white" : "#F8616C", fontWeight:"400", textTransform:"none", fontSize:"14px"}}>
+                            {UserName || "Admin"}
+                        </Button>
 
-                    <Menu id="basic-menu" anchorEl={anchorElAdmin} open={openAdmin} onClose={handleCloseAdmin} MenuListProps={{'aria-labelledby': 'basic-button',}}
-                          style={{color:"#F8616C", fontWeight:"400", textTransform:"none", fontSize:"14px"}}>
-                        <MenuItem onClick={handleClose}>Profile</MenuItem>
-                        <MenuItem onClick={handleClose}>Dashboard</MenuItem>
-                        <MenuItem onClick={handleClose}>Logout</MenuItem>
-                    </Menu>
-                </div>
+                        <Menu id="basic-menu-admin" anchorEl={anchorElAdmin} open={openAdmin} onClose={handleCloseAdmin} MenuListProps={{'aria-labelledby': 'basic-button-admin',}}>
+                            <MenuItem onClick={handleCloseAdmin}>Profile</MenuItem>
+                            <MenuItem onClick={handleCloseAdmin}>Dashboard</MenuItem>
+                            <MenuItem onClick={() => { handleCloseAdmin(); logout(); }}>Logout</MenuItem>
+                        </Menu>
+                    </div>
+                )}
             </div>
         </div>
     )

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import axios from "axios";
 
-const SearchResults = () => {
+const SearchedActivities = () => {
     const location = useLocation();
     const { searchParams, apiHeaders } = location.state || { searchParams: {}, apiHeaders: {} };
 
@@ -150,4 +150,4 @@ const SearchResults = () => {
     )
 }
 
-export default SearchResults;
+export default SearchedActivities;

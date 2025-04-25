@@ -1,4 +1,4 @@
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useLocation } from "react-router-dom";
 
 import Logo from "../assets/images/travelease-redlogo.png";
 import Button from "@mui/material/Button";
@@ -11,16 +11,19 @@ import { FaYoutube } from "react-icons/fa";
 
 const Footer = () => {
 
+    const location = useLocation();
+    const isHomePage = location.pathname === "/";
+
     const navigate = useNavigate();
     const toHome = () => {navigate("/")};
     const toActivities = () => {navigate("/activities")};
     const toPromotions = () => {navigate("/promotions")};
 
     return(
-        <div className="px-6 pt-20 pb-5 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80 w-full bg-white flex flex-col gap-4 xl:gap-14 justify-between items-center">
+        <div className={`px-6 pt-20 pb-5 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80 w-full ${isHomePage ? "bg-white" : "bg-blacksecond"} flex flex-col gap-4 xl:gap-14 justify-between items-center`}>
             <div className="flex flex-col xl:flex-row justify-between xl:justify-center items-start xl:items-center gap-8 w-full">
                 <div className="flex flex-col justify-center items-start gap-2">
-                    <img src={Logo} alt="travelease-logo" className="w-50 xl:w-70"/>
+                    <img src={Logo} alt="travelease-logo" className="w-50 xl:w-45"/>
                     <p className="text-md font-light text-gray">A comprehensive travel and activity booking platform that simplifies
                         your journey from planning to experience.
                     </p>
@@ -28,14 +31,14 @@ const Footer = () => {
 
                 <div className="w-full flex justify-start xl:justify-center items-center">
                     <div className="flex flex-wrap xl:flex-nowrap xl:flex-col justify-between items-start">
-                        <Button onClick={toHome} variant="text" sx={{color:"black", textTransform:"none", fontWeight:"400", fontSize:"18px"}}>Home</Button>
-                        <Button onClick={toActivities} variant="text" sx={{color:"black", textTransform:"none", fontWeight:"400", fontSize:"18px"}}>Activities</Button>
-                        <Button onClick={toPromotions} variant="text" sx={{color:"black", textTransform:"none", fontWeight:"400", fontSize:"18px"}}>Promotions</Button>
+                        <Button onClick={toHome} variant="text" sx={{color: isHomePage ? "black" : "white", textTransform:"none", fontWeight:"400", fontSize:"14px"}}>Home</Button>
+                        <Button onClick={toActivities} variant="text" sx={{color: isHomePage ? "black" : "white", textTransform:"none", fontWeight:"400", fontSize:"14px"}}>Activities</Button>
+                        <Button onClick={toPromotions} variant="text" sx={{color: isHomePage ? "black" : "white", textTransform:"none", fontWeight:"400", fontSize:"14px"}}>Promotions</Button>
                     </div>
                 </div>
 
-                <div className="flex flex-col justify-between items-start">
-                    <h4 className="text-sm text-black font-medium">Contact Info</h4>
+                <div className="flex flex-col justify-between items-start gap-2">
+                    <h4 className={`text-sm ${isHomePage ? "text-black" : "text-white"} font-medium`}>Contact Info</h4>
                     <p className="text-md text-gray font-light">1000 5th Ave to Bumi Anggrek, Bekasi <br/> +62 812 9879 0058 <br/> workspace.rendy@gmail.com</p>
                 </div>
             </div>
