@@ -1,153 +1,122 @@
-import { useState, useEffect } from "react";
-import { useLocation, Link } from "react-router-dom";
+// SearchedActivities.jsx
+import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useLocation, useNavigate } from "react-router-dom";
 
-const SearchedActivities = () => {
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+
+import Button from "@mui/material/Button";
+import {BiCommentDots, BiStar} from "react-icons/bi";
+
+const SearchedActivities = ({ categoriesFromApp }) => {
     const location = useLocation();
-    const { searchParams, apiHeaders } = location.state || { searchParams: {}, apiHeaders: {} };
 
-    const [results, setResults] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const [activities, setActivities] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    // Ambil params dari query string
+    const searchParams = new URLSearchParams(location.search);
+    const title = searchParams.get("title") || "";
+    const categoryId = searchParams.get("categoryId") || "";
 
     useEffect(() => {
-        const fetchSearchResults = async () => {
-            setIsLoading(true);
-            setError(null);
-
-            // Membuat instance axios dengan konfigurasi default
-            const api = axios.create({
-                baseURL: "https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1",
-                headers: apiHeaders
-            });
-
-            // Menyiapkan parameter query
-            const params = {};
-            
-            if (searchParams.text) {
-                params.q = searchParams.text;
-            }
-            
-            if (searchParams.categoryId) {
-                params.categoryId = searchParams.categoryId;
-            }
-            
-            if (searchParams.activityId) {
-                params.activityId = searchParams.activityId;
-            }
-
+        const fetchActivities = async () => {
+            setLoading(true);
             try {
-                // Fetch data dari API menggunakan axios
-                const response = await api.get('/search', { params });
-                
-                console.log("Search API response:", response.data);
-                
-                if (response.data.status === "success") {
-                    setResults(response.data.data || []);
-                } else {
-                    setError(response.data.message || "Terjadi kesalahan saat mencari data");
+                // Fetch semua activity dulu
+                const res = await axios.get(
+                    "https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/activities",
+                    {
+                        headers: {
+                            "Content-Type": "application/json",
+                            "apiKey": '24405e01-fbc1-45a5-9f5a-be13afcd757c'
+                        }
+                    }
+                );
+                let results = res.data.data;
+
+                // Filter by title and categoryId (hanya filter lokal, jika API mendukung query params gunakan itu)
+                if (title) {
+                    results = results.filter(act =>
+                        act.title.toLowerCase().includes(title.toLowerCase())
+                    );
                 }
-            } catch (error) {
-                console.error("Error fetching search results:", error);
-                
-                if (error.response) {
-                    // Error dari response API (status code bukan 2xx)
-                    setError(`Error ${error.response.status}: ${error.response.data.message || "Terjadi kesalahan pada server"}`);
-                } else if (error.request) {
-                    // Error karena tidak ada response (network error)
-                    setError("Tidak dapat terhubung ke server. Silakan periksa koneksi Anda.");
-                } else {
-                    // Error pada setup request
-                    setError("Terjadi kesalahan: " + error.message);
+                if (categoryId) {
+                    results = results.filter(act => act.categoryId === categoryId);
                 }
+                setActivities(results);
+            } catch (err) {
+                setActivities([]);
             } finally {
-                setIsLoading(false);
+                setLoading(false);
             }
         };
 
-        fetchSearchResults();
-    }, [searchParams, apiHeaders]);
+        fetchActivities();
+    }, [title, categoryId]);
 
-    return(
-        <div className="max-w-4xl mx-auto mt-8 p-6 bg-white rounded shadow">
-            <h2 className="text-2xl font-bold mb-6">Hasil Pencarian</h2>
+    return (
+        <div className="m-0 p-0 box-border font-primary">
+            <div className="flex flex-col justify-between">
 
-            {/* Menampilkan parameter pencarian */}
-            <div className="mb-6 p-4 bg-gray-100 rounded">
-                <p>
-                    {searchParams.text ? `Pencarian: "${searchParams.text}"` : "Semua hasil"}
-                    {searchParams.categoryId ? ` dalam kategori ID: ${searchParams.categoryId}` : ""}
-                    {searchParams.activityId ? ` dengan aktivitas ID: ${searchParams.activityId}` : ""}
-                </p>
+            </div>
+            <Header />
+
+            <div className="pt-20 pb-10 flex flex-col items-center xl:items-start justify-between px-6 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80">
+                <div>
+                    <h1 className="font-light text-black text-2xl mb-4">Search Results</h1>
+                    {loading ? (<div>Loading...</div>) : activities.length === 0 ? (<div>No activities found.</div>) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+                            {activities.map(act => (
+                                <div key={act.id}>
+                                    <div className="mt-10 pb-15 flex flex-col xl:flex-row justify-center items-start ">
+                                        <div className="flex flex-col justify-between items-start gap-2">
+                                            <img src={act.imageUrls[0]} alt="activities-image" className="w-full h-full object-cover"/>
+                                            <div className="w-full flex flex-col justify-between items-start gap-2">
+                                                <div className="flex flex-row justify-between items-center gap-1">
+                                                    <BiStar className="size-4 text-yellow-500" />
+                                                    <h4>{act.rating}</h4>
+                                                    <h4 className="text-md font-light text-black">Stars</h4>
+                                                </div>
+
+                                                <h3 className="font-normal text-3xl">{act.title}</h3>
+
+                                                <div className="flex flex-row justify-between items-end w-full">
+                                                    <div className="flex flex-col justify-between items-start">
+                                                        <div className="text-md font-light text-black">{act.city}</div>
+                                                        <div className="text-md xl:text-sm font-light text-gray">{act.province}</div>
+                                                    </div>
+                                                    <div className="flex flex-row justify-between items-center gap-1">
+                                                        <BiCommentDots className="size-4 text-gray" />
+                                                        <div className="text-md font-light text-black">{act.total_reviews}</div>
+                                                        <h4 className="text-md font-light text-black">Reviews</h4>
+                                                    </div>
+                                                </div>
+
+                                                <div className="border-b-[0.03rem] border-black/10 w-full"></div>
+
+                                                <div className="flex flex-col justify-between items-start">
+                                                    <div className="flex flex-row justify-between items-center gap-1">
+                                                        <h4 className="text-md font-light text-gray">Price</h4>
+                                                        <h4 className="text-md font-medium text-black">{act.price}</h4>
+                                                    </div>
+
+                                                    <p className="text-md font-light text-gray overflow-hidden text-ellipsis line-clamp-3">{act.description}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
 
-            {isLoading ? (
-                <div className="flex justify-center p-4">
-                    <p>Mencari data...</p>
-                </div>
-            ) : error ? (
-                <div className="p-4 bg-red-100 text-red-700 rounded">
-                    <p>{error}</p>
-                    <div className="mt-4">
-                        <Link to="/" className="text-blue-600 hover:text-blue-800">
-                            ← Kembali ke halaman pencarian
-                        </Link>
-                    </div>
-                </div>
-            ) : results.length === 0 ? (
-                <div className="p-4 bg-yellow-100 rounded">
-                    <p>Tidak ada hasil yang ditemukan. Silakan coba dengan kata kunci lain.</p>
-                    <div className="mt-4">
-                        <Link to="/" className="text-blue-600 hover:text-blue-800">
-                            ← Kembali ke halaman pencarian
-                        </Link>
-                    </div>
-                </div>
-            ) : (
-                <>
-                    <div className="mb-4">
-                        <p className="text-sm text-gray-600">Ditemukan {results.length} hasil</p>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {results.map((item) => (
-                            <div key={item.id} className="border rounded overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                                {item.imageUrl && (
-                                    <img
-                                        src={item.imageUrl}
-                                        alt={item.name || "Travel image"}
-                                        className="w-full h-48 object-cover"
-                                        onError={(e) => {
-                                            e.target.onerror = null;
-                                            e.target.src = 'https://placehold.co/600x400?text=No+Image';
-                                        }}
-                                    />
-                                )}
-                                <div className="p-4">
-                                    <h3 className="text-lg font-semibold mb-2">{item.name || item.title}</h3>
-                                    {item.category && (
-                                        <p className="text-sm text-gray-600 mb-1">
-                                            Kategori: {item.category.name}
-                                        </p>
-                                    )}
-                                    {item.activity && (
-                                        <p className="text-sm text-gray-600 mb-2">
-                                            Aktivitas: {item.activity.name}
-                                        </p>
-                                    )}
-                                    <p className="text-sm line-clamp-3">{item.description || "Tidak ada deskripsi"}</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                    <div className="mt-6">
-                        <Link to="/" className="text-blue-600 hover:text-blue-800">
-                            ← Kembali ke halaman pencarian
-                        </Link>
-                    </div>
-                </>
-            )}
+            <Footer />
         </div>
-    )
-}
+    );
+};
 
 export default SearchedActivities;

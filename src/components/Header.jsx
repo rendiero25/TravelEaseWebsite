@@ -32,6 +32,8 @@ const Header = () => {
     const toHome = () => {navigate("/")};
     const toActivities = () => {navigate("/activities")};
     const toPromotions = () => {navigate("/promotions")};
+    const toAboutUs = () => {navigate("/about-us")};
+    const toContact = () => {navigate("/contact")};
     const toLogin = () => {navigate("/login")};
     const toRegister = () => {navigate("/register")};
 
@@ -65,6 +67,8 @@ const Header = () => {
                     <Button onClick={toHome} variant="text" sx={{color: isHomePage ? "white" : "#1E1E1E", textTransform:"none", fontWeight:"400", fontSize:"14px"}}>Home</Button>
                     <Button onClick={toActivities} variant="text" sx={{color: isHomePage ? "white" : "#1E1E1E", textTransform:"none", fontWeight:"400", fontSize:"14px"}}>Activities</Button>
                     <Button onClick={toPromotions} variant="text" sx={{color: isHomePage ? "white" : "#1E1E1E", textTransform:"none", fontWeight:"400", fontSize:"14px"}}>Promotions</Button>
+                    <Button onClick={toAboutUs} variant="text" sx={{color: isHomePage ? "white" : "#1E1E1E", textTransform:"none", fontWeight:"400", fontSize:"14px"}}>About Us</Button>
+                    <Button onClick={toContact} variant="text" sx={{color: isHomePage ? "white" : "#1E1E1E", textTransform:"none", fontWeight:"400", fontSize:"14px"}}>Contact</Button>
                 </div>
             </div>
 

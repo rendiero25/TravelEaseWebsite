@@ -1,4 +1,4 @@
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useLocation} from "react-router-dom";
 
 import * as React from 'react';
 import Button from '@mui/material/Button';
@@ -11,10 +11,15 @@ import { BiCollapse } from "react-icons/bi";
 
 const MobileMenu = ({toogleCloseMenu}) => {
 
+    const location = useLocation();
+    const isHomePage = location.pathname === "/";
+
     const navigate = useNavigate();
     const toHome = () => {navigate("/")};
     const toActivities = () => {navigate("/activities")};
     const toPromotions = () => {navigate("/promotions")};
+    const toAboutUs = () => {navigate("/about-us")};
+    const toContact = () => {navigate("/contact")};
     const toLogin = () => {navigate("/login")};
     const toRegister = () => {navigate("/register")};
 
@@ -43,7 +48,7 @@ const MobileMenu = ({toogleCloseMenu}) => {
             <div className="flex flex-row w-full justify-between items-center">
                 <h4 className="font-normal text-2xl text-white pl-2">travelease</h4>
                 <Button className="bg-blue-500">
-                    <BiCollapse onClick={toogleCloseMenu} className="size-8 text-white"/>
+                    <BiCollapse onClick={toogleCloseMenu} className={`size-8 text-white ${isHomePage ? "" : "text-primary"}`}/>
                 </Button>
             </div>
 
@@ -51,6 +56,8 @@ const MobileMenu = ({toogleCloseMenu}) => {
                 <Button onClick={toHome} variant="text" sx={{color:"white", textTransform:"none", fontWeight:"300", fontSize:"35px"}}>Home</Button>
                 <Button onClick={toActivities} variant="text" sx={{color:"white", textTransform:"none", fontWeight:"300", fontSize:"35px"}}>Activities</Button>
                 <Button onClick={toPromotions} variant="text" sx={{color:"white", textTransform:"none", fontWeight:"300", fontSize:"35px"}}>Promotions</Button>
+                <Button onClick={toAboutUs} variant="text" sx={{color:"white", textTransform:"none", fontWeight:"300", fontSize:"35px"}}>About Us</Button>
+                <Button onClick={toContact} variant="text" sx={{color:"white", textTransform:"none", fontWeight:"300", fontSize:"35px"}}>Contact</Button>
             </div>
 
             <div className="flex flex-row justify-between items-center gap-6">
