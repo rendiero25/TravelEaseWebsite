@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { BiSearchAlt } from "react-icons/bi";
+import {BiCommentDots, BiSearchAlt, BiStar} from "react-icons/bi";
 import Button from "@mui/material/Button";
 
 import Header from "../components/Header";
@@ -101,17 +101,56 @@ const Activities = () => {
                                     {activities.length === 0 ? (
                                         <div className="text-center py-16">No activities found.</div>
                                     ) : (
-                                        <ul className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <ul className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                             {activities.map(act => (
-                                                <li key={act.id} className="bg-white rounded-xl shadow p-5 flex flex-col gap-2">
-                                                    <img
-                                                        src={act.imageUrls?.[0] || "https://via.placeholder.com/300x200?text=No+Image"}
-                                                        alt={act.title}
-                                                        className="w-full h-48 object-cover rounded-lg mb-3"
-                                                    />
-                                                    <h3 className="font-bold text-lg">{act.title}</h3>
-                                                    <div className="text-gray-500 text-sm">{act.category?.name}</div>
-                                                    <div className="text-gray-400 text-xs">By: {act.createdBy || "-"}</div>
+                                                <li key={act.id} className="group bg-white rounded-xl p-4 flex flex-col justify-between gap-2 cursor-pointer">
+                                                    <div className="flex flex-col xl:flex-row justify-center items-start">
+                                                        <div className="flex flex-col justify-between items-start gap-2 w-full h-full">
+                                                            <img
+                                                                src={act.imageUrls?.[0]}
+                                                                alt={act.title}
+                                                                className="w-full h-48 object-cover mb-3 transition-transform duration-300 ease-in-out group-hover:scale-110"
+                                                                onError={event => {
+                                                                    event.target.onerror = null;
+                                                                    event.target.src = "https://media.universalparksusa.com/wp-content/uploads/2024/02/Universal-Studios-Hollywood-globe-entrance-scaled.jpg";
+                                                                }}
+                                                            />
+                                                            <div className="w-full flex flex-col justify-between items-start gap-2">
+                                                                <div className="flex flex-row justify-between items-center gap-1">
+                                                                    <BiStar className="size-4 text-yellow-500" />
+                                                                    <h4>{act.rating}</h4>
+                                                                    <h4 className="text-md font-light text-black">Stars</h4>
+                                                                </div>
+
+                                                                <h3 className="font-normal text-3xl">{act.title}</h3>
+
+                                                                <div className="flex flex-row justify-between items-end w-full">
+                                                                    <div className="flex flex-col justify-between items-start">
+                                                                        <div className="text-md font-light text-black">{act.city}</div>
+                                                                        <div className="text-md xl:text-sm font-light text-gray">{act.province}</div>
+                                                                    </div>
+                                                                    <div className="flex flex-row justify-between items-center gap-1">
+                                                                        <BiCommentDots className="size-4 text-gray" />
+                                                                        <div className="text-md font-light text-black">{act.total_reviews}</div>
+                                                                        <h4 className="text-md font-light text-black">Reviews</h4>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div className="border-b-[0.03rem] border-black/10 w-full"></div>
+
+                                                                <div className="flex flex-col justify-between items-start">
+                                                                    <div className="flex flex-row justify-between items-center gap-1">
+                                                                        <h4 className="text-md font-light text-gray">Price</h4>
+                                                                        <h4 className="text-md font-medium text-black">{act.price}</h4>
+                                                                    </div>
+
+                                                                    <p className="text-md font-light text-gray overflow-hidden text-ellipsis line-clamp-3">{act.description}</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="text-gray text-sm font-light mt-4 italic">{act.category?.name}</div>
                                                 </li>
                                             ))}
                                         </ul>

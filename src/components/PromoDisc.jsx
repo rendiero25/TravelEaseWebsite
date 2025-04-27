@@ -27,7 +27,7 @@ const PromoDisc = () => {
 
                 const response = await axios.get("https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/promos", config);
                 // Make sure we're accessing the data array correctly from the API response
-                const topFiveActivities = response.data.data || [];
+                const topFiveActivities = response.data.data.slice(0,5) || [];
 
                 setActivities(topFiveActivities);
                 setLoading(false);

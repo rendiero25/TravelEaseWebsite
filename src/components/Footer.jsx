@@ -18,6 +18,8 @@ const Footer = () => {
     const toHome = () => {navigate("/")};
     const toActivities = () => {navigate("/activities")};
     const toPromotions = () => {navigate("/promotions")};
+    const toAboutUs = () => {navigate("/about-us")};
+    const toContact = () => {navigate("/contact")};
 
     return(
         <div className={`px-6 pt-20 pb-5 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80 w-full ${isHomePage ? "bg-white" : "bg-blacksecond"} flex flex-col gap-4 xl:gap-14 justify-between items-center`}>
@@ -29,11 +31,15 @@ const Footer = () => {
                     </p>
                 </div>
 
-                <div className="w-full flex justify-start xl:justify-center items-center">
+                <div className="w-full flex flex-col xl:flex-row justify-start xl:justify-center items-center xl:items-start gap-8">
                     <div className="flex flex-wrap xl:flex-nowrap xl:flex-col justify-between items-start">
-                        <Button onClick={toHome} variant="text" sx={{color: isHomePage ? "black" : "white", textTransform:"none", fontWeight:"400", fontSize:"14px"}}>Home</Button>
+                        <Button onClick={toHome} variant="text" sx={{color: isHomePage ? "black" : "white", textTransform:"none", fontWeight:"400", fontSize:"14px", marginLeft:"-4px"}}>Home</Button>
                         <Button onClick={toActivities} variant="text" sx={{color: isHomePage ? "black" : "white", textTransform:"none", fontWeight:"400", fontSize:"14px"}}>Activities</Button>
                         <Button onClick={toPromotions} variant="text" sx={{color: isHomePage ? "black" : "white", textTransform:"none", fontWeight:"400", fontSize:"14px"}}>Promotions</Button>
+                    </div>
+                    <div className="flex flex-wrap xl:flex-nowrap xl:flex-col justify-between items-start">
+                        <Button onClick={toAboutUs} variant="text" sx={{color: isHomePage ? "black" : "white", textTransform:"none", fontWeight:"400", fontSize:"14px"}}>About Us</Button>
+                        <Button onClick={toContact} variant="text" sx={{color: isHomePage ? "black" : "white", textTransform:"none", fontWeight:"400", fontSize:"14px"}}>Contact</Button>
                     </div>
                 </div>
 

@@ -24,7 +24,7 @@ const Banner = () => {
                 };
 
                 const response = await axios.get("https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/banners", config);
-                const dataFromApi = response.data.data || [];
+                const dataFromApi = response.data.data.slice(0, 5) || [];
 
                 setBanners(dataFromApi);
                 setLoading(false);

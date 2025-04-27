@@ -85,7 +85,15 @@ const TopActivities = () => {
                             <SwiperSlide key={activitiesdata.id}>
                                 <div className="mt-10 pb-15 flex flex-col xl:flex-row justify-center items-start">
                                     <div className="flex flex-col justify-between items-start gap-2">
-                                        <img src={activitiesdata.imageUrls[0]} alt="activities-image" className="w-full h-full object-cover"/>
+                                        <img
+                                            src={activitiesdata.imageUrls[0]}
+                                            alt="activities-image"
+                                            className="w-full h-full object-cover"
+                                            onError={event => {
+                                                event.target.onerror = null;
+                                                event.target.src = "https://media.universalparksusa.com/wp-content/uploads/2024/02/Universal-Studios-Hollywood-globe-entrance-scaled.jpg";
+                                            }}/>
+
                                         <div className="w-full flex flex-col justify-between items-start gap-2">
                                             <div className="flex flex-row justify-between items-center gap-1">
                                                 <BiStar className="size-4 text-yellow-500" />
@@ -117,8 +125,6 @@ const TopActivities = () => {
 
                                                 <p className="text-md font-light text-gray overflow-hidden text-ellipsis line-clamp-3">{activitiesdata.description}</p>
                                             </div>
-
-
                                         </div>
                                     </div>
                                 </div>
