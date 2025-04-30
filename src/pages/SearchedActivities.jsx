@@ -11,9 +11,14 @@ import {BiCommentDots, BiStar} from "react-icons/bi";
 
 const SearchedActivities = ({ categoriesFromApp }) => {
     const location = useLocation();
+    const navigate = useNavigate();
 
     const [activities, setActivities] = useState([]);
     const [loading, setLoading] = useState(true);
+    
+    const goToActivityDetails = (activityId) => {
+        navigate(`/activity/${activityId}`);
+    };
 
     // Ambil params dari query string
     const searchParams = new URLSearchParams(location.search);
@@ -67,7 +72,11 @@ const SearchedActivities = ({ categoriesFromApp }) => {
                         {loading ? (<div>Loading...</div>) : activities.length === 0 ? (<div>No activities found.</div>) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
                                 {activities.map(act => (
-                                    <div key={act.id} className="group">
+                                    <div 
+                                        key={act.id} 
+                                        className="group cursor-pointer" 
+                                        onClick={() => goToActivityDetails(act.id)}
+                                    >
                                         <div className="mt-10 pb-15 flex flex-col xl:flex-row justify-center items-start ">
                                             <div className="flex flex-col justify-between items-start gap-2">
                                                 <img src={act.imageUrls[0]} alt="activities-image" className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"/>

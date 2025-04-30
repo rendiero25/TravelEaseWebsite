@@ -83,7 +83,10 @@ const TopActivities = () => {
 
                         {activities.map((activitiesdata) => (
                             <SwiperSlide key={activitiesdata.id}>
-                                <div className="mt-10 pb-15 flex flex-col xl:flex-row justify-center items-start">
+                                <div 
+                                    className="mt-10 pb-15 flex flex-col xl:flex-row justify-center items-start cursor-pointer"
+                                    onClick={() => navigate(`/activity/${activitiesdata.id}`)}
+                                >
                                     <div className="flex flex-col justify-between items-start gap-2">
                                         <img
                                             src={activitiesdata.imageUrls[0]}

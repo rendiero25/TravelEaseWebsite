@@ -15,6 +15,7 @@ import PurchaseList from "./pages/PurchaseList.jsx";
 import ForgotPassword from "./pages/ForgotPassword.jsx";
 import AboutUs from "./pages/AboutUs.jsx";
 import Contact from "./pages/Contact.jsx";
+import ActivityDetails from "./pages/ActivityDetails.jsx";
 
 const App = () => {
 
@@ -40,6 +41,7 @@ const App = () => {
                 <Routes>
                     <Route path="/" element={<Index categoriesFromApp={categories} />} />
                     <Route path="/activities" element={<Activities />} />
+                    <Route path="/activity/:id" element={<ActivityDetails />} />
                     <Route path="/search-results" element={<SearchedActivities categoriesFromApp={categories} />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
