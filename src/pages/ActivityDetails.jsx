@@ -1,14 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+
+import Button from "@mui/material/Button";
+import {BiCommentDots, BiMap, BiStar} from "react-icons/bi";
+import { FcLikePlaceholder } from "react-icons/fc";
+import { FcLike } from "react-icons/fc";
+import { BiShareAlt } from "react-icons/bi";
+
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
+import PromoDisc from "../components/PromoDisc.jsx";
+
+import { MdOutlineFastfood } from "react-icons/md";
+import { LuCircleParking } from "react-icons/lu";
+import { IoIosWifi } from "react-icons/io";
+import { GrRestroom } from "react-icons/gr";
+import { RiCustomerService2Line } from "react-icons/ri";
+import { BiPhone } from "react-icons/bi";
+import { BiLink } from "react-icons/bi";
+import { BiTime } from "react-icons/bi";
 
 const ActivityDetails = () => {
     const { id } = useParams();
     const [activity, setActivity] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [liked, setLiked] = useState(false);
 
     useEffect(() => {
         const fetchActivityDetails = async () => {
@@ -71,69 +89,192 @@ const ActivityDetails = () => {
     );
 
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="m-0 p-0 box-border font-primary">
             <Header />
-            <div className="flex-grow container mx-auto px-4 py-8">
-                <h1 className="text-3xl md:text-4xl font-bold mb-6">{activity.title}</h1>
-                
-                {/* Image Gallery */}
-                <div className="mb-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {activity.imageUrls && activity.imageUrls.map((url, index) => (
-                            <div key={index} className="overflow-hidden rounded-lg shadow-md">
-                                <img 
-                                    src={url} 
-                                    alt={`${activity.title} - image ${index + 1}`} 
-                                    className="w-full h-64 object-cover"
-                                    onError={(e) => {
-                                        e.target.onerror = null;
-                                        e.target.src = "https://media.universalparksusa.com/wp-content/uploads/2024/02/Universal-Studios-Hollywood-globe-entrance-scaled.jpg";
-                                    }}
-                                />
-                            </div>
-                        ))}
-                    </div>
-                </div>
-                
-                {/* Activity Details */}
-                <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-                    <div className="flex flex-wrap justify-between mb-4">
-                        <div className="mb-4 md:mb-0">
-                            <p className="text-gray-600">Location: {activity.city}, {activity.province}</p>
-                            <div className="flex items-center mt-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                                <span className="ml-1">{activity.rating} Rating</span>
-                                <span className="mx-2">•</span>
-                                <span>{activity.total_reviews} Reviews</span>
+
+            <div className="px-6 py-10 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80">
+                <div className="w-full flex-col justify-between items-start gap-4">
+                    <div className="pb-5 xl:pb-7 flex flex-col justify-between center gap-2 w-full">
+                        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-2">
+                            <h3 className="text-black font-bold text-4xl">{activity.title}</h3>
+                            <div className="flex flex-row justify-between items-center gap-4">
+                                <div className="flex flex-row justify-center items-center gap-1">
+                                    <BiStar className="size-4 text-yellow-500" />
+                                    <h4 className="text-md font-light">{activity.rating}</h4>
+                                    <h4 className="text-md font-light text-black">Stars</h4>
+                                </div>
+                                <div className="flex flex-row justify-between items-center gap-1">
+                                    <BiCommentDots className="size-4 text-gray" />
+                                    <div className="text-md font-light text-black">{activity.total_reviews}</div>
+                                    <h4 className="text-md font-light text-black">Reviews</h4>
+                                </div>
                             </div>
                         </div>
-                        <div className="text-right">
-                            <p className="text-lg font-semibold">Price:</p>
-                            <p className="text-2xl text-[#F8616C] font-bold">${activity.price}</p>
+
+                        <div className="flex flex-col xl:flex-row justify-between items-start gap-8">
+                            <div className="flex flex-row justify-between items-center gap-2">
+                                <BiMap className="size-4 text-gray" />
+                                <div className="text-md xl:text-sm font-light text-gray">{`${activity.city}` + "," + " "}</div>
+                                <div className="text-md xl:text-sm font-light text-gray">{activity.province}</div>
+                            </div>
+                            <div className="flex flex-row justify-between items-center xl:items-start gap-4">
+                                <button onClick={() => setLiked(!liked)}>
+                                    <div>{liked ? <FcLike className="size-7 xl:size-5" /> : <FcLikePlaceholder className="size-7 xl:size-5" />}</div>
+                                </button>
+                                <BiShareAlt className="size-7 xl:size-5"/>
+                            </div>
                         </div>
                     </div>
-                    
-                    <h2 className="text-xl font-semibold mb-2">Description</h2>
-                    <p className="text-gray-700 mb-6">{activity.description}</p>
-                    
-                    <h2 className="text-xl font-semibold mb-2">Facilities</h2>
-                    <div className="mb-6">
-                        <ul className="list-disc list-inside space-y-1">
-                            {activity.facilities_name && activity.facilities_name.map((facility, index) => (
-                                <li key={index} className="text-gray-700">{facility}</li>
-                            ))}
-                        </ul>
-                    </div>
-                    
-                    <div className="flex justify-center mt-4">
-                        <button className="bg-[#F8616C] hover:bg-[#e54b57] text-white font-bold py-3 px-8 rounded-full transition-colors">
-                            Book Now
-                        </button>
+
+                    <div className="border-b-[0.03rem] border-black/25 w-full"></div>
+
+                    <div className="pt-5 xl:pt-7 flex flex-col xl:flex-row justify-between gap-10">
+                        <div className="w-80vw flex flex-col items-start gap-8">
+                            <div className="flex flex-col justify-between items-start gap-4">
+                                <div className="w-full xl:h-[20rem] flex flex-col justify-between items-start gap-4">
+                                    <img
+                                        src={activity.imageUrls[0]}
+                                        alt="activity-image"
+                                        className="w-full h-full object-cover"
+                                        onError={event => {
+                                            event.target.onerror = null;
+                                            event.target.src = "https://media.universalparksusa.com/wp-content/uploads/2024/02/Universal-Studios-Hollywood-globe-entrance-scaled.jpg";
+                                        }}/>
+                                    <h4 className="font-normal text-xl text-black">Overview</h4>
+                                    <p className="font-light text-md text-black">{activity.description}</p>
+                                    <div className="w-full flex flex-col justify-between items-start gap-4 border-[0.03rem] border-black/15 p-4 rounded-lg">
+                                        <h4 className="font-normal text-xl text-black">Facilities</h4>
+                                        <div className="flex flex-row justify-center items-start gap-8">
+                                            <div className="flex flex-col xl:flex-row justify-start items-start gap-4">
+                                                <div className="flex flex-row justify-center items-center gap-2">
+                                                    <MdOutlineFastfood className="text-primary size-6"/>
+                                                    <h4 className="text-black font-normal text-md">Restaurant</h4>
+                                                </div>
+                                                <div className="flex flex-row justify-center items-center gap-2">
+                                                    <LuCircleParking className="text-primary size-6"/>
+                                                    <h4 className="text-black font-normal text-md">Parking</h4>
+                                                </div>
+                                                <div className="flex flex-row justify-center items-center gap-2">
+                                                    <IoIosWifi className="text-primary size-6"/>
+                                                    <h4 className="text-black font-normal text-md">Wifi</h4>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col xl:flex-row justify-center items-start gap-4">
+                                                <div className="flex flex-row justify-center items-center gap-2">
+                                                    <GrRestroom className="text-primary size-6"/>
+                                                    <h4 className="text-black font-normal text-md">Restroom</h4>
+                                                </div>
+                                                <div className="flex flex-row justify-center items-center gap-2">
+                                                    <RiCustomerService2Line className="text-primary size-6"/>
+                                                    <h4 className="text-black font-normal text-md">12-Hour Front Desk</h4>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="my-3 border-b-[0.03rem] border-black/25 w-full"></div>
+
+                                    <div className="hidden w-full xl:flex flex-col xl:flex-row justify-center xl:justify-end items-center gap-1 xl:gap-4">
+                                        <div className="flex flex-col justify-center items-end">
+                                            <h4 className="text-md font-light text-lg text-gray">Price</h4>
+                                            <div className="flex flex-row items-center gap-2">
+                                                <h4 className="text-md font-bold text-2xl text-primary mb-4 xl:mb-0">Rp</h4>
+                                                <h4 className="text-md font-bold text-2xl text-primary mb-4 xl:mb-0">{activity.price}</h4>
+                                            </div>
+
+                                        </div>
+
+                                        <Button
+                                            variant="contained"
+                                            sx={{backgroundColor:"#F8616C", color:"white", fontWeight:"400", textTransform:"none", fontSize:"14px", borderRadius:"50px", padding:"14px 50px"}}
+                                        >Add to Cart</Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="w-10vw pb-10 flex flex-col justify-between items-start gap-12">
+                            <div className="flex flex-col justify-between items-start gap-4 w-full">
+                                <div className="hidden xl:flex flex-col justify-between items-start gap-4">
+                                    <h4 className="font-normal text-xl text-black">Location</h4>
+                                    <div className="size-80 overflow-hidden">
+                                        <div dangerouslySetInnerHTML={{ __html: activity.location_maps?.replace(/width="\d+"/, 'width="100%"')}} className="size-6"></div>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col justify-between items-start gap-4">
+                                    <h4 className="font-normal text-xl text-black">Details</h4>
+
+                                    <div className="border-b-[0.03rem] border-black/25 w-full"></div>
+
+                                    <div className="flex flex-col justify-between items-start gap-2 max-w-sm">
+                                        <div className="flex flex-row items-center gap-3 w-full">
+                                            <BiMap className="size-5 text-gray" />
+
+                                            <div className="flex flex-col justify-between items-start w-full">
+                                                <div className="text-md xl:text-sm font-normal text-gray">{activity.address}</div>
+
+                                                <div className="flex flex-row justify-between items-start gap-1">
+                                                    <div className="text-md xl:text-sm font-light text-gray italic">{`${activity.city}` + "," + " "}</div>
+                                                    <div className="text-md xl:text-sm font-light text-gray italic">{activity.province}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-row items-center gap-3 w-full">
+                                            <BiPhone className="size-4 text-gray" />
+                                            <h4 className="text-md xl:text-sm font-normal text-gray">+6221-88439641</h4>
+                                        </div>
+
+                                        <div className="flex flex-row items-center gap-3 w-full">
+                                            <BiLink className="size-4 text-gray" />
+                                            <a href="https://activityname.com" className="text-md xl:text-sm font-normal text-gray">https://activityname.com</a>
+                                        </div>
+
+                                        <div className="flex flex-row justify-between items-center gap-3">
+                                            <BiTime className="size-4 text-gray" />
+
+                                            <div className="flex flex-col justify-between items-start gap-1">
+                                                <h4 className="text-md xl:text-sm font-normal text-gray">Closed Until Noon</h4>
+
+                                                <div className="flex flex-col justify-between items-start gap-1 w-full">
+                                                    <div className="flex flex-row justify-between items-start">
+                                                        <h4 className="text-md xl:text-sm font-normal text-gray">Mon-Thu, Sun</h4>
+                                                        <h4 className="text-md xl:text-sm font-normal text-gray">Noon-Midnight</h4>
+                                                    </div>
+                                                    <div className="flex flex-row justify-between items-start">
+                                                        <h4 className="text-md xl:text-sm font-normal text-gray">Fri-Sat</h4>
+                                                        <h4 className="text-md xl:text-sm font-normal text-gray">Noon-1.00 AM</h4>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="xl:hidden w-full flex flex-col justify-center items-center gap-1">
+                                <h4 className="text-md font-light text-xl text-gray">Price</h4>
+                                <h4 className="text-md font-bold text-2xl text-primary mb-4">{activity.price}</h4>
+
+                                <Button
+                                    variant="contained"
+                                    sx={{backgroundColor:"#F8616C", color:"white", fontWeight:"400", textTransform:"none", fontSize:"14px", borderRadius:"50px", padding:"14px 50px"}}
+                                        >Add to Cart</Button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <div className="xl:mb-38 4xl:mb-50">
+                <div>
+                    <PromoDisc />
+                </div>
+
+            </div>
+
             <Footer />
         </div>
     );

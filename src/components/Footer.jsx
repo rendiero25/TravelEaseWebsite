@@ -31,7 +31,7 @@ const Footer = () => {
                     </p>
                 </div>
 
-                <div className="w-full flex flex-col xl:flex-row justify-start xl:justify-center items-center xl:items-start gap-8">
+                <div className="w-full flex flex-col xl:flex-row justify-start xl:justify-center items-start gap-8">
                     <div className="flex flex-wrap xl:flex-nowrap xl:flex-col justify-between items-start">
                         <Button onClick={toHome} variant="text" sx={{color: isHomePage ? "black" : "white", textTransform:"none", fontWeight:"400", fontSize:"14px", marginLeft:"-4px"}}>Home</Button>
                         <Button onClick={toActivities} variant="text" sx={{color: isHomePage ? "black" : "white", textTransform:"none", fontWeight:"400", fontSize:"14px"}}>Activities</Button>
@@ -44,7 +44,7 @@ const Footer = () => {
                 </div>
 
                 <div className="flex flex-col justify-between items-start gap-2">
-                    <h4 className={`text-sm ${isHomePage ? "text-black" : "text-white"} font-medium`}>Contact Info</h4>
+                    <h4 className={`text-sm ${isHomePage ? "text-black" : "text-gray"} font-medium`}>Contact Info</h4>
                     <p className="text-md text-gray font-light">1000 5th Ave to Bumi Anggrek, Bekasi <br/> +62 812 9879 0058 <br/> workspace.rendy@gmail.com</p>
                 </div>
             </div>
