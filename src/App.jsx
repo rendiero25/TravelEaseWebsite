@@ -16,6 +16,7 @@ import ForgotPassword from "./pages/ForgotPassword.jsx";
 import AboutUs from "./pages/AboutUs.jsx";
 import Contact from "./pages/Contact.jsx";
 import ActivityDetails from "./pages/ActivityDetails.jsx";
+import Cart from "./pages/Cart.jsx";
 
 const App = () => {
 
@@ -51,6 +52,7 @@ const App = () => {
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/about-us" element={<AboutUs />} />
                     <Route path="/contact" element={<Contact />} />
+                    <Route path="/cart" element={<Cart />} />
                 </Routes>
             </BrowserRouter>
         </AuthProvider>

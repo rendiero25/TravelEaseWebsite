@@ -5,6 +5,10 @@ import * as React from 'react';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
+import { styled } from '@mui/material/styles';
+import IconButton from '@mui/material/IconButton';
+import Badge, { badgeClasses } from '@mui/material/Badge';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 import MobileMenu from "../components/MobileMenu.jsx";
 
@@ -55,6 +59,12 @@ const Header = () => {
     const UserName = auth.user?.name || "";
 
     console.log('state auth:', auth)
+
+    const CartBadge = styled(Badge)`
+      & .${badgeClasses.badge} {
+        top: -12px;
+        right: -6px;
+      }`;
 
     return(
         <div className={`px-6 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80 py-2 w-full ${isHomePage ? "bg-transparent" : "bg-white"} ${isHomePage ? "absolute" : "relative"} top-0 border-b-[0.03rem] border-white/25 flex justify-between items-center ${isHomePage ? "shadow-none" : "shadow-2xl/10"}`}>
@@ -124,6 +134,13 @@ const Header = () => {
                         </Menu>
                     </div>
                 )}
+
+                <div>
+                    <IconButton>
+                        <ShoppingCartIcon fontSize="small" sx={{color: isHomePage ? "white" : "#F8616C"}}/>
+                        <CartBadge badgeContent={0} color="primary" overlap="circular" />
+                    </IconButton>
+                </div>
             </div>
         </div>
     )
