@@ -1,10 +1,10 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext.jsx";
 
-import { Button, TextField, Container, Typography, Accordion, AccordionSummary, AccordionDetails, Box, Grid, Paper, IconButton, InputAdornment, Divider } from "@mui/material";
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { Button, TextField, Container, Typography, Box, Grid, Paper, IconButton, InputAdornment, Divider, CircularProgress, Alert } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -15,7 +15,6 @@ import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
 
 const Cart = () => {
-
     const { auth } = useAuth();
     const navigate = useNavigate();
     const [cartItems, setCartItems] = useState([]);
@@ -28,6 +27,10 @@ const Cart = () => {
     const [discount, setDiscount] = useState(0);
     const [total, setTotal] = useState(0);
     const [deleteLoading, setDeleteLoading] = useState({});
+    const [checkoutLoading, setCheckoutLoading] = useState(false);
+    const [promoLoading, setPromoLoading] = useState(false);
+    const [promoError, setPromoError] = useState(null);
+    const [promoSuccess, setPromoSuccess] = useState(null);
 
     useEffect(() => {
         // Redirect if not logged in
@@ -53,19 +56,20 @@ const Cart = () => {
                 );
 
                 const items = response.data.data || [];
+                console.log("Cart items:", items);
                 setCartItems(items);
 
                 // Initialize quantities for each item
                 const initialQuantities = {};
                 items.forEach(item => {
-                    initialQuantities[item.id] = 1;
+                    initialQuantities[item.id] = item.quantity || 1;
                 });
                 setQuantities(initialQuantities);
 
                 // Initialize booking dates for each item
                 const initialDates = {};
                 items.forEach(item => {
-                    initialDates[item.id] = new Date();
+                    initialDates[item.id] = item.bookingDate ? new Date(item.bookingDate) : new Date();
                 });
                 setBookingDates(initialDates);
 
@@ -79,7 +83,7 @@ const Cart = () => {
                 setLoading(false);
             } catch (err) {
                 console.error("Failed to fetch cart items", err);
-                setError('Failed to load cart items');
+                setError(err.response?.data?.message || 'Failed to load cart items');
                 setLoading(false);
             }
         };
@@ -96,119 +100,333 @@ const Cart = () => {
         setTotal(sub - discount);
     };
 
-    const handleQuantityChange = (itemId, increment) => {
+    const handleQuantityChange = async (itemId, increment) => {
         const newQuantities = { ...quantities };
-        newQuantities[itemId] = Math.max(1, (newQuantities[itemId] || 1) + increment);
+        const newQuantity = Math.max(1, (newQuantities[itemId] || 1) + increment);
+        newQuantities[itemId] = newQuantity;
+
+        // Update UI immediately
         setQuantities(newQuantities);
         calculateSubtotal(cartItems, newQuantities);
+
+        try {
+            // Update quantity on server
+            const config = {
+                headers: {
+                    'apiKey': '24405e01-fbc1-45a5-9f5a-be13afcd757c',
+                    'Authorization': `Bearer ${auth.token}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            await axios.put(
+                `https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/update-cart/${itemId}`,
+                { quantity: newQuantity },
+                config
+            );
+        } catch (err) {
+            console.error("Failed to update cart quantity", err);
+            // Revert to previous quantity if update fails
+            newQuantities[itemId] = quantities[itemId];
+            setQuantities(newQuantities);
+            calculateSubtotal(cartItems, newQuantities);
+            setError("Failed to update quantity. Please try again.");
+        }
     };
 
-    const handleDateChange = (itemId, date) => {
+    const handleDateChange = async (itemId, date) => {
+        if (!date || isNaN(date.getTime())) {
+            console.error("Invalid date selected");
+            return;
+        }
+
         const newDates = { ...bookingDates };
         newDates[itemId] = date;
+
+        // Update UI immediately
         setBookingDates(newDates);
+
+        try {
+            // Format date for API
+            const formattedDate = formatDateString(date);
+
+            // Update booking date on server
+            const config = {
+                headers: {
+                    'apiKey': '24405e01-fbc1-45a5-9f5a-be13afcd757c',
+                    'Authorization': `Bearer ${auth.token}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            await axios.put(
+                `https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/update-cart/${itemId}`,
+                { bookingDate: formattedDate },
+                config
+            );
+        } catch (err) {
+            console.error("Failed to update booking date", err);
+            // Revert to previous date if update fails
+            newDates[itemId] = bookingDates[itemId];
+            setBookingDates(newDates);
+            setError("Failed to update booking date. Please try again.");
+        }
     };
 
-    const applyPromoCode = () => {
-        // In a real app, you would validate the promo code with your backend
-        // For now, let's just simulate a fixed discount
-        if (promoCode.trim() !== "") {
-            const discountAmount = 50000; // Example: 50,000 IDR discount
+    const applyPromoCode = async () => {
+        if (!promoCode.trim()) {
+            setPromoError("Please enter a promo code");
+            return;
+        }
+
+        setPromoLoading(true);
+        setPromoError(null);
+        setPromoSuccess(null);
+
+        try {
+            // Validate promo code with API
+            const config = {
+                headers: {
+                    'apiKey': '24405e01-fbc1-45a5-9f5a-be13afcd757c',
+                    'Authorization': `Bearer ${auth.token}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            const response = await axios.post(
+                'https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/validate-promo',
+                { promoCode: promoCode.trim() },
+                config
+            );
+
+            if (response.data && response.data.data) {
+                const promoData = response.data.data;
+                const discountAmount = (promoData.discountPercent / 100) * subtotal;
+                setDiscount(discountAmount);
+                setTotal(subtotal - discountAmount);
+                setPromoSuccess(`Promo applied! You saved Rp ${discountAmount.toLocaleString('id-ID')}`);
+            } else {
+                setPromoError("Invalid promo code");
+                setDiscount(0);
+                setTotal(subtotal);
+            }
+        } catch (err) {
+            console.error("Failed to validate promo code", err);
+            setPromoError(err.response?.data?.message || "Failed to validate promo code");
+            // For demo purposes, apply a fixed discount if API fails
+            const discountAmount = subtotal * 0.1; // 10% discount
             setDiscount(discountAmount);
             setTotal(subtotal - discountAmount);
+            setPromoSuccess(`Demo discount applied! You saved Rp ${discountAmount.toLocaleString('id-ID')}`);
+        } finally {
+            setPromoLoading(false);
+        }
+    };
+
+    // Utility function to format date as YYYY-MM-DD
+    const formatDateString = (date) => {
+        if (!date) {
+            const today = new Date();
+            return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        }
+
+        try {
+            if (!(date instanceof Date) || isNaN(date.getTime())) {
+                // If it's not a valid Date object, use today's date
+                const today = new Date();
+                return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            }
+
+            // Format as YYYY-MM-DD using direct string manipulation instead of toISOString
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+
+            return `${year}-${month}-${day}`;
+        } catch (err) {
+            console.error("Date formatting error:", err);
+            const today = new Date();
+            return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
         }
     };
 
     const proceedToCheckout = async () => {
-        // Check if user is logged in
-        if (!auth.isLoggedIn || !auth.token) {
-            navigate('/login');
-            return;
-        }
-
-        // Check if cart is empty
-        if (cartItems.length === 0) {
-            alert('Your cart is empty');
-            return;
-        }
-
         try {
-            // Create transaction using API
+            // Prevent multiple clicks
+            if (checkoutLoading) return;
+            setCheckoutLoading(true);
+
+            // Check if user is logged in
+            if (!auth.isLoggedIn || !auth.token) {
+                navigate('/login');
+                return;
+            }
+
+            // Check if cart is empty
+            if (cartItems.length === 0) {
+                setError('Your cart is empty');
+                setCheckoutLoading(false);
+                return;
+            }
+
+            // Setup API request configuration
             const config = {
                 headers: {
                     'apiKey': '24405e01-fbc1-45a5-9f5a-be13afcd757c',
-                    'Authorization': `Bearer ${auth.token}`
+                    'Authorization': `Bearer ${auth.token}`,
+                    'Content-Type': 'application/json'
                 }
             };
 
-            // Prepare transaction data
+            // 1. GET CART DATA TO ENSURE WE HAVE VALID CART IDS
+            const cartIds = cartItems.map(item => item.id);
+            console.log("Cart IDs to be used:", cartIds);
+
+            // Validate payment methods - we need at least one for the transaction
+            const paymentMethodsResponse = await axios.get(
+                'https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/payment-methods',
+                config
+            );
+
+            const paymentMethods = paymentMethodsResponse.data.data || [];
+            if (!paymentMethods.length) {
+                setError('No payment methods available. Please try again later.');
+                setCheckoutLoading(false);
+                return;
+            }
+
+            // 2. CREATE TRANSACTION WITH API (moved from Checkout.jsx)
+            // Prepare transaction data with cart IDs
             const transactionData = {
-                promoCode: promoCode.trim() || null,
-                items: cartItems.map(item => ({
-                    activityId: item.activity.id,
-                    quantity: quantities[item.id] || 1,
-                    bookingDate: bookingDates[item.id].toISOString().split('T')[0]
-                }))
+                cartIds: cartIds,
+                paymentMethodId: paymentMethods[0].id.toString() // Use first payment method by default
             };
 
-            console.log("Transaction data:", transactionData); // Log the data being sent
+            // Add promo code if available
+            if (promoCode.trim()) {
+                transactionData.promoCode = promoCode.trim();
+            }
 
-            // Call the create transaction API
+            console.log("Creating transaction with data:", transactionData);
+
+            // Create transaction API call
             const response = await axios.post(
                 'https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/create-transaction',
                 transactionData,
                 config
             );
 
-            console.log("Transaction response:", response.data); // Log the response
+            console.log("Transaction created successfully:", response.data);
 
-            // // Check if user role is allowed (optional additional check)
-            // if (auth.user && !['user', 'admin'].includes(auth.user.role)) {
-            //     throw new Error("You don't have permission to proceed with checkout");
-            // }
+            // 3. Extract transaction ID from response
+            let transactionId = null;
 
-            // Store transaction data for checkout page
+            // Try to extract ID directly from response
+            if (response.data && response.data.data && response.data.data.id) {
+                transactionId = response.data.data.id;
+                console.log("Transaction ID extracted from response:", transactionId);
+            }
+            // If no direct ID in response but success message, get from transactions API
+            else if (response.data && response.data.message === "Transaction Created") {
+                try {
+                    // Get latest transaction from API
+                    const transactionsResponse = await axios.get(
+                        'https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/my-transactions',
+                        config
+                    );
+
+                    const transactions = transactionsResponse.data.data || [];
+
+                    if (transactions.length > 0) {
+                        // Get ID from latest transaction
+                        const latestTransaction = transactions[0];
+                        transactionId = latestTransaction.id;
+                        console.log("Transaction ID obtained from latest transaction:", transactionId);
+                    } else {
+                        throw new Error("No transactions found after creation");
+                    }
+                } catch (fetchErr) {
+                    console.error("Error fetching transaction details after creation:", fetchErr);
+                    setError("Transaction created but could not retrieve details. Please try again.");
+                    setCheckoutLoading(false);
+                    return;
+                }
+            } else {
+                setError("Could not create transaction properly. Please try again.");
+                setCheckoutLoading(false);
+                return;
+            }
+
+            // Ensure we have a valid transaction ID
+            if (!transactionId) {
+                setError("Failed to get valid transaction ID. Please try again.");
+                setCheckoutLoading(false);
+                return;
+            }
+
+            // 4. Prepare transaction details for checkout page
             const transactionDetails = {
-                transactionId: response.data.data.id,
+                // Now we have a real transaction ID from API
+                transactionId: transactionId,
+                // Items details for display
                 items: cartItems.map(item => ({
-                    id: item.id,
+                    id: item.id, // This is the cart ID
+                    cartId: item.id,
+                    activityId: item.activity.id,
                     title: item.activity.title,
                     description: item.activity.description,
                     city: item.activity.city,
                     province: item.activity.province,
                     imageUrl: item.activity.imageUrls?.[0],
                     price: item.activity.price,
-                    quantity: quantities[item.id] || 1
+                    quantity: quantities[item.id] || 1,
+                    bookingDate: formatDateString(bookingDates[item.id])
                 })),
+                // Critical for API calls - array of cart IDs
+                cartIds: cartIds,
+                // Payment method (from first available)
+                paymentMethodId: paymentMethods[0].id,
+                // Promo and pricing info
                 promoCode: promoCode.trim() || "None",
                 subtotal: subtotal,
                 discount: discount,
-                total: total
+                total: total,
+                // Status and timestamp
+                status: 'pending',
+                orderDate: new Date().toISOString()
             };
 
-            // Store transaction details in session storage to use in checkout page
+            console.log("Proceeding to checkout with transaction:", transactionDetails);
+
+            // Store transaction details in session storage for checkout page
             sessionStorage.setItem('transactionDetails', JSON.stringify(transactionDetails));
 
             // Navigate to checkout page
             navigate('/checkout');
-
         } catch (err) {
-            console.error("Failed to create transaction", err);
-            console.error("Error details:", err.response?.data);
-            alert(err.response?.data?.message || "Failed to create transaction. Please try again.");
+            console.error("Failed to proceed to checkout", err);
+
+            // Handle error responses
+            if (err.response) {
+                console.error("Error status:", err.response.status);
+                console.error("Error data:", err.response.data);
+
+                if (err.response.data?.errors) {
+                    setError(`Transaction Error: ${err.response.data.errors}`);
+                } else if (err.response.data?.message) {
+                    setError(`Transaction Error: ${err.response.data.message}`);
+                } else {
+                    setError("Server returned an error. Please try again.");
+                }
+            } else if (err.request) {
+                setError("No response from server. Please check your internet connection.");
+            } else {
+                setError("An error occurred while proceeding to checkout: " + err.message);
+            }
+        } finally {
+            setCheckoutLoading(false);
         }
     };
-
-    // // Store order data in session/local storage or pass via state
-    //     sessionStorage.setItem('orderData', JSON.stringify(orderData));
-    //     sessionStorage.setItem('orderSummary', JSON.stringify({
-    //         subtotal,
-    //         discount,
-    //         total
-    //     }));
-    //
-    //     navigate('/checkout');
-    // };
 
     const handleDeleteItem = async (cartId) => {
         try {
@@ -247,213 +465,219 @@ const Cart = () => {
 
         } catch (err) {
             console.error("Failed to delete cart item", err);
-            alert("Failed to delete item from cart");
+            setError("Failed to delete item from cart");
         } finally {
             // Reset loading state for this specific item
             setDeleteLoading(prev => ({ ...prev, [cartId]: false }));
         }
     };
 
-    const handleCheckout = () => {
-        // Implement the checkout process
-        console.log("Proceeding to checkout with items:", cartItems);
-    };
+    if (loading) {
+        return (
+            <div className="min-h-screen flex flex-col">
+                <Header />
+                <Container className="flex-grow py-8 flex items-center justify-center">
+                    <CircularProgress />
+                </Container>
+                <Footer />
+            </div>
+        );
+    }
 
-    if (loading) return (
+    return (
         <div className="min-h-screen flex flex-col">
             <Header />
-            <div className="flex-grow flex items-center justify-center">
-                <div className="text-2xl">Loading your cart...</div>
-            </div>
-            <Footer />
-        </div>
-    );
+            <Container className="flex-grow py-8">
+                <Typography variant="h4" component="h1" gutterBottom className="font-semibold">
+                    Your Cart
+                </Typography>
 
-    if (error) return (
-        <div className="min-h-screen flex flex-col">
-            <Header />
-            <div className="flex-grow flex items-center justify-center">
-                <div className="text-2xl text-red-500">Error: {error}</div>
-            </div>
-            <Footer />
-        </div>
-    );
+                {error && (
+                    <Alert severity="error" className="mb-4" onClose={() => setError(null)}>
+                        {error}
+                    </Alert>
+                )}
 
-    return(
-        <div className="m-0 p-0 box-border font-primary">
-            <div className="px-6 py-10 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80">
-                    <Container className="flex-grow py-10">
-                        <Typography variant="h4" gutterBottom>
-                            Your Cart
+                {cartItems.length === 0 ? (
+                    <Paper className="p-6 text-center">
+                        <Typography variant="h6" className="mb-4">
+                            Your cart is empty
                         </Typography>
-
-                        {cartItems.length === 0 ? (
-                            <Typography>Your cart is empty.</Typography>
-                        ) : (
-                            <Grid container spacing={3}>
-                                {/* Cart Items */}
-                                <Grid item xs={12} md={8}>
-                                    {cartItems.map(item => (
-                                        <Accordion key={item.id} sx={{ mb: 2 }}>
-                                            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                                <Grid container alignItems="center" spacing={2}>
-                                                    <Grid item xs={5}>
-                                                        <Typography variant="subtitle1">
-                                                            {item.activity.title}
-                                                        </Typography>
-                                                    </Grid>
-                                                    <Grid item xs={3}>
-                                                        <Typography variant="body2">
-                                                            {item.activity.city}
-                                                        </Typography>
-                                                    </Grid>
-                                                    <Grid item xs={4}>
-                                                        <Typography variant="body2">
-                                                            {item.activity.province}
-                                                        </Typography>
-                                                    </Grid>
-                                                </Grid>
-                                                <Box display="flex" justifyContent="flex-end">
-                                                    <IconButton
-                                                        color="error"
-                                                        onClick={() => handleDeleteItem(item.id)}
-                                                        disabled={deleteLoading[item.id]}>
-                                                        <DeleteIcon />
-                                                    </IconButton>
-                                                </Box>
-                                            </AccordionSummary>
-                                            <AccordionDetails>
-                                                <Grid container spacing={2}>
-                                                    <Grid item xs={12}>
-                                                        <Typography variant="body2" paragraph>
-                                                            {item.activity.description}
-                                                        </Typography>
-                                                        <Typography variant="body2" color="primary">
-                                                            Price: IDR {item.activity.price.toLocaleString()}
-                                                        </Typography>
-                                                    </Grid>
-                                                </Grid>
-                                            </AccordionDetails>
-
-                                            <Box p={2}>
-                                                <Grid container spacing={2} alignItems="center">
-                                                    <Grid item xs={12} sm={6} md={4}>
-                                                        <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                                            <DatePicker
-                                                                label="Booking Date"
-                                                                value={bookingDates[item.id]}
-                                                                onChange={(date) => handleDateChange(item.id, date)}
-                                                                disablePast
-                                                                renderInput={(params) => <TextField {...params} fullWidth />}
-                                                            />
-                                                        </LocalizationProvider>
-                                                    </Grid>
-                                                    <Grid item xs={12} sm={6} md={4}>
-                                                        <Box display="flex" alignItems="center">
-                                                            <IconButton
-                                                                color="primary"
-                                                                onClick={() => handleQuantityChange(item.id, -1)}
-                                                                disabled={quantities[item.id] <= 1}
-                                                            >
-                                                                <RemoveIcon />
-                                                            </IconButton>
-                                                            <TextField
-                                                                value={quantities[item.id] || 1}
-                                                                disabled
-                                                                size="small"
-                                                                sx={{ width: 60, mx: 1, input: { textAlign: 'center' } }}
-                                                            />
-                                                            <IconButton
-                                                                color="primary"
-                                                                onClick={() => handleQuantityChange(item.id, 1)}
-                                                            >
-                                                                <AddIcon />
-                                                            </IconButton>
-                                                        </Box>
-                                                    </Grid>
-                                                    <Grid item xs={12} sm={12} md={4}>
-                                                        <Typography variant="body1" align="right">
-                                                            Total: IDR {((item.activity.price * (quantities[item.id] || 1)).toLocaleString())}
-                                                        </Typography>
-                                                    </Grid>
-                                                </Grid>
-                                            </Box>
-                                        </Accordion>
-                                    ))}
-                                </Grid>
-
-                                {/* Order Summary */}
-                                <Grid item xs={12} md={4}>
-                                    <Paper elevation={3} sx={{ p: 3 }}>
-                                        <Typography variant="h6" gutterBottom>
-                                            Order Summary
-                                        </Typography>
-
-                                        <Box display="flex" justifyContent="space-between" mb={2}>
-                                            <Typography>Subtotal</Typography>
-                                            <Typography>IDR {subtotal.toLocaleString()}</Typography>
-                                        </Box>
-
-                                        <Box mb={3}>
-                                            <TextField
-                                                label="Promo Code"
-                                                value={promoCode}
-                                                onChange={(e) => setPromoCode(e.target.value)}
-                                                size="small"
-                                                fullWidth
-                                                InputProps={{
-                                                    endAdornment: (
-                                                        <InputAdornment position="end">
-                                                            <Button
-                                                                variant="text"
-                                                                onClick={applyPromoCode}
-                                                                size="small"
-                                                            >
-                                                                Apply
-                                                            </Button>
-                                                        </InputAdornment>
-                                                    )
-                                                }}
-                                                sx={{ mb: 1 }}
-                                            />
-
-                                            {discount > 0 && (
-                                                <Box display="flex" justifyContent="space-between">
-                                                    <Typography color="success.main">Discount</Typography>
-                                                    <Typography color="success.main">-IDR {discount.toLocaleString()}</Typography>
-                                                </Box>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => navigate('/activities')}
+                        >
+                            Browse Activities
+                        </Button>
+                    </Paper>
+                ) : (
+                    <Grid container spacing={4}>
+                        <Grid item xs={12} md={8}>
+                            {cartItems.map((item) => (
+                                <Paper key={item.id} className="p-4 mb-4">
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={12} sm={3}>
+                                            {item.activity.imageUrls && item.activity.imageUrls[0] && (
+                                                <img
+                                                    src={item.activity.imageUrls[0]}
+                                                    alt={item.activity.title}
+                                                    className="w-full h-24 object-cover rounded"
+                                                    onError={(e) => {
+                                                        e.target.onerror = null;
+                                                        e.target.src = "https://via.placeholder.com/150?text=Image+Not+Available";
+                                                    }}
+                                                />
                                             )}
-                                        </Box>
+                                        </Grid>
+                                        <Grid item xs={12} sm={9}>
+                                            <Box className="flex justify-between">
+                                                <Typography variant="h6" className="font-semibold">
+                                                    {item.activity.title}
+                                                </Typography>
+                                                <IconButton
+                                                    color="error"
+                                                    onClick={() => handleDeleteItem(item.id)}
+                                                    disabled={deleteLoading[item.id]}
+                                                >
+                                                    {deleteLoading[item.id] ? <CircularProgress size={24} /> : <DeleteIcon />}
+                                                </IconButton>
+                                            </Box>
+                                            <Typography variant="body2" className="text-gray-600 mb-2">
+                                                {item.activity.city}, {item.activity.province}
+                                            </Typography>
+                                            <Typography variant="body1" className="font-semibold mb-2">
+                                                Rp {item.activity.price.toLocaleString('id-ID')} per person
+                                            </Typography>
 
-                                        <Divider sx={{ my: 2 }} />
+                                            <Grid container spacing={2} className="mt-2">
+                                                <Grid item xs={12} sm={6}>
+                                                    <Typography variant="body2" className="mb-1">
+                                                        Quantity:
+                                                    </Typography>
+                                                    <Box className="flex items-center">
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => handleQuantityChange(item.id, -1)}
+                                                            disabled={quantities[item.id] <= 1}
+                                                        >
+                                                            <RemoveIcon />
+                                                        </IconButton>
+                                                        <Typography className="mx-2">
+                                                            {quantities[item.id] || 1}
+                                                        </Typography>
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => handleQuantityChange(item.id, 1)}
+                                                        >
+                                                            <AddIcon />
+                                                        </IconButton>
+                                                    </Box>
+                                                </Grid>
+                                                <Grid item xs={12} sm={6}>
+                                                    <Typography variant="body2" className="mb-1">
+                                                        Booking Date:
+                                                    </Typography>
+                                                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                                        <DatePicker
+                                                            value={bookingDates[item.id] || new Date()}
+                                                            onChange={(newDate) => handleDateChange(item.id, newDate)}
+                                                            slotProps={{ textField: { size: 'small', fullWidth: true } }}
+                                                            disablePast
+                                                        />
+                                                    </LocalizationProvider>
+                                                </Grid>
+                                            </Grid>
+                                            <Box className="mt-2 text-right">
+                                                <Typography variant="body1" className="font-semibold">
+                                                    Subtotal: Rp {((item.activity.price * (quantities[item.id] || 1))).toLocaleString('id-ID')}
+                                                </Typography>
+                                            </Box>
+                                        </Grid>
+                                    </Grid>
+                                </Paper>
+                            ))}
+                        </Grid>
 
-                                        <Box display="flex" justifyContent="space-between" mb={3}>
-                                            <Typography variant="h6">Total</Typography>
-                                            <Typography variant="h6">IDR {total.toLocaleString()}</Typography>
-                                        </Box>
+                        <Grid item xs={12} md={4}>
+                            <Paper className="p-6 sticky" style={{ top: '1rem' }}>
+                                <Typography variant="h6" className="font-semibold mb-4">
+                                    Order Summary
+                                </Typography>
 
-                                        <Button
-                                            variant="contained"
-                                            color="primary"
-                                            fullWidth
-                                            onClick={proceedToCheckout}
-                                            sx={{
-                                                backgroundColor: '#F97316',
-                                                '&:hover': {
-                                                    backgroundColor: '#FB923C',
-                                                }
-                                            }}
-                                        >
-                                            Proceed to Checkout
-                                        </Button>
-                                    </Paper>
-                                </Grid>
-                            </Grid>
-                        )}
-                    </Container>
-            </div>
+                                <Box className="mb-4">
+                                    <TextField
+                                        label="Promo Code"
+                                        variant="outlined"
+                                        size="small"
+                                        fullWidth
+                                        value={promoCode}
+                                        onChange={(e) => setPromoCode(e.target.value)}
+                                        InputProps={{
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <Button
+                                                        onClick={applyPromoCode}
+                                                        disabled={promoLoading}
+                                                        variant="text"
+                                                        color="primary"
+                                                        size="small"
+                                                    >
+                                                        {promoLoading ? <CircularProgress size={20} /> : 'Apply'}
+                                                    </Button>
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                    />
+                                    {promoError && (
+                                        <Typography variant="caption" color="error">
+                                            {promoError}
+                                        </Typography>
+                                    )}
+                                    {promoSuccess && (
+                                        <Typography variant="caption" color="success.main">
+                                            {promoSuccess}
+                                        </Typography>
+                                    )}
+                                </Box>
+
+                                <Box className="flex justify-between mb-2">
+                                    <Typography>Subtotal</Typography>
+                                    <Typography>Rp {subtotal.toLocaleString('id-ID')}</Typography>
+                                </Box>
+
+                                <Box className="flex justify-between mb-2">
+                                    <Typography>Discount</Typography>
+                                    <Typography color="success.main">- Rp {discount.toLocaleString('id-ID')}</Typography>
+                                </Box>
+
+                                <Divider className="my-2" />
+
+                                <Box className="flex justify-between mb-4">
+                                    <Typography variant="h6" className="font-semibold">Total</Typography>
+                                    <Typography variant="h6" className="font-semibold">
+                                        Rp {total.toLocaleString('id-ID')}
+                                    </Typography>
+                                </Box>
+
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    fullWidth
+                                    size="large"
+                                    onClick={proceedToCheckout}
+                                    disabled={checkoutLoading || cartItems.length === 0}
+                                >
+                                    {checkoutLoading ? <CircularProgress size={24} /> : 'Proceed to Checkout'}
+                                </Button>
+                            </Paper>
+                        </Grid>
+                    </Grid>
+                )}
+            </Container>
+            <Footer />
         </div>
-    )
-}
+    );
+};
 
 export default Cart;

@@ -78,21 +78,46 @@ const ActivityDetails = () => {
         try {
             setAddingToCart(true);
 
-            // Use the addToCart function from CartContext
-            const success = await addToCart(id);
+            // Gunakan API add-cart langsung, bukan melalui CartContext
+            const config = {
+                headers: {
+                    'apiKey': '24405e01-fbc1-45a5-9f5a-be13afcd757c',
+                    'Authorization': `Bearer ${auth.token}`
+                }
+            };
 
-            if (success) {
-                // Show success notification instead of navigating
+            const data = {
+                activityId: id
+            };
+
+            // Panggil API add-cart
+            const response = await axios.post(
+                'https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/add-cart',
+                data,
+                config
+            );
+
+            if (response.data && response.data.status === 'OK') {
+                // Show success notification
                 setAddSuccess(true);
 
                 // Hide success message after 3 seconds
                 setTimeout(() => {
                     setAddSuccess(false);
                 }, 3000);
+
+                // Jika masih menggunakan context untuk cart count, perbarui cartCount
+                // Ini opsional, tergantung implementasi CartContext Anda
+                if (addToCart && typeof addToCart === 'function') {
+                    addToCart(id, false); // parameter kedua false agar tidak memanggil API lagi
+                }
+            } else {
+                throw new Error(response.data?.message || 'Failed to add to cart');
             }
         } catch (err) {
             console.error("Failed to add activity to cart", err);
-            setError('Failed to add activity to cart');
+            const errorMsg = err.response?.data?.message || err.message || 'Failed to add activity to cart';
+            alert(errorMsg);
         } finally {
             setAddingToCart(false);
         }
@@ -322,12 +347,6 @@ const ActivityDetails = () => {
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <div className="xl:mb-38 4xl:mb-50">
-                <div>
-                    <PromoDisc />
                 </div>
             </div>
         </div>

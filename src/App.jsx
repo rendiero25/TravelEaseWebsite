@@ -20,6 +20,7 @@ import ActivityDetails from "./pages/ActivityDetails.jsx";
 import Cart from "./pages/Cart.jsx";
 import Header from "./components/Header.jsx";
 import Footer from "./components/Footer.jsx";
+import Checkout from "./pages/Checkout.jsx";
 
 const App = () => {
 
@@ -58,6 +59,7 @@ const App = () => {
                         <Route path="/about-us" element={<AboutUs />} />
                         <Route path="/contact" element={<Contact />} />
                         <Route path="/cart" element={<Cart />} />
+                        <Route path="/checkout" element={<Checkout />} />
                     </Routes>
                     <Footer />
                 </BrowserRouter>
