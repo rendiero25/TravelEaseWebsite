@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
+import { useCart } from "../contexts/CartContext";
+
 import * as React from 'react';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
@@ -31,6 +33,9 @@ const Header = () => {
 
     const { auth, logout } = useAuth();
     console.log("user dari auth context:", auth.user);
+    console.log("Auth state in header:", auth); // Add this for debugging
+
+    const { cartCount } = useCart();
 
     const navigate = useNavigate();
     const toHome = () => {navigate("/")};
@@ -136,9 +141,9 @@ const Header = () => {
                 )}
 
                 <div>
-                    <IconButton>
+                    <IconButton onClick={() => navigate("/cart")} aria-label="cart">
                         <ShoppingCartIcon fontSize="small" sx={{color: isHomePage ? "white" : "#F8616C"}}/>
-                        <CartBadge badgeContent={0} color="primary" overlap="circular" />
+                        <CartBadge badgeContent={cartCount} color="primary" overlap="circular" />
                     </IconButton>
                 </div>
             </div>

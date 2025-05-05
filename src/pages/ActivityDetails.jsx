@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useAuth } from "../contexts/AuthContext.jsx";
+import { useCart } from "../contexts/CartContext.jsx";
 
 import Button from "@mui/material/Button";
-import {BiCommentDots, BiMap, BiStar} from "react-icons/bi";
+import { BiCommentDots, BiMap, BiStar } from "react-icons/bi";
 import { FcLikePlaceholder } from "react-icons/fc";
 import { FcLike } from "react-icons/fc";
 import { BiShareAlt } from "react-icons/bi";
@@ -22,11 +24,19 @@ import { BiLink } from "react-icons/bi";
 import { BiTime } from "react-icons/bi";
 
 const ActivityDetails = () => {
+
     const { id } = useParams();
     const [activity, setActivity] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [liked, setLiked] = useState(false);
+
+    const navigate = useNavigate();
+    const { auth } = useAuth();
+    const [addingToCart, setAddingToCart] = useState(false);
+
+    const { addToCart } = useCart();
+    const [addSuccess, setAddSuccess] = useState(false);
 
     useEffect(() => {
         const fetchActivityDetails = async () => {
@@ -57,6 +67,36 @@ const ActivityDetails = () => {
             fetchActivityDetails();
         }
     }, [id]);
+
+    const handleAddToCart = async () => {
+        // Check if user is logged in
+        if (!auth.isLoggedIn) {
+            navigate('/login');
+            return;
+        }
+
+        try {
+            setAddingToCart(true);
+
+            // Use the addToCart function from CartContext
+            const success = await addToCart(id);
+
+            if (success) {
+                // Show success notification instead of navigating
+                setAddSuccess(true);
+
+                // Hide success message after 3 seconds
+                setTimeout(() => {
+                    setAddSuccess(false);
+                }, 3000);
+            }
+        } catch (err) {
+            console.error("Failed to add activity to cart", err);
+            setError('Failed to add activity to cart');
+        } finally {
+            setAddingToCart(false);
+        }
+    };
 
     if (loading) return (
         <div className="min-h-screen flex flex-col">
@@ -90,8 +130,6 @@ const ActivityDetails = () => {
 
     return (
         <div className="m-0 p-0 box-border font-primary">
-            <Header />
-
             <div className="px-6 py-10 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80">
                 <div className="w-full flex-col justify-between items-start gap-4">
                     <div className="pb-5 xl:pb-7 flex flex-col justify-between center gap-2 w-full">
@@ -186,8 +224,18 @@ const ActivityDetails = () => {
 
                                         <Button
                                             variant="contained"
+                                            onClick={handleAddToCart}
+                                            disabled={addingToCart}
                                             sx={{backgroundColor:"#F8616C", color:"white", fontWeight:"400", textTransform:"none", fontSize:"14px", borderRadius:"50px", padding:"14px 50px"}}
-                                        >Add to Cart</Button>
+                                                >Add to Cart
+                                        </Button>
+
+                                        {addSuccess && (
+                                            <div className="fixed top-20 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50">
+                                                Item added to cart successfully!
+                                            </div>
+                                        )}
+
                                     </div>
                                 </div>
                             </div>
@@ -260,8 +308,17 @@ const ActivityDetails = () => {
 
                                 <Button
                                     variant="contained"
+                                    onClick={handleAddToCart}
+                                    disabled={addingToCart}
                                     sx={{backgroundColor:"#F8616C", color:"white", fontWeight:"400", textTransform:"none", fontSize:"14px", borderRadius:"50px", padding:"14px 50px"}}
-                                        >Add to Cart</Button>
+                                        >Add to Cart
+                                </Button>
+
+                                {addSuccess && (
+                                    <div className="fixed top-20 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50">
+                                        Item added to cart successfully!
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -272,10 +329,7 @@ const ActivityDetails = () => {
                 <div>
                     <PromoDisc />
                 </div>
-
             </div>
-
-            <Footer />
         </div>
     );
 };

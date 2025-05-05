@@ -1,8 +1,9 @@
 import React, { useEffect, useState} from "react";
 import axios from "axios";
 
-import {BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+import { CartProvider } from './contexts/CartContext';
 
 import Index from "./pages/Index.jsx";
 import Activities from "./pages/Activities.jsx";
@@ -17,6 +18,8 @@ import AboutUs from "./pages/AboutUs.jsx";
 import Contact from "./pages/Contact.jsx";
 import ActivityDetails from "./pages/ActivityDetails.jsx";
 import Cart from "./pages/Cart.jsx";
+import Header from "./components/Header.jsx";
+import Footer from "./components/Footer.jsx";
 
 const App = () => {
 
@@ -38,23 +41,27 @@ const App = () => {
 
     return(
         <AuthProvider>
-            <BrowserRouter>
-                <Routes>
-                    <Route path="/" element={<Index categoriesFromApp={categories} />} />
-                    <Route path="/activities" element={<Activities />} />
-                    <Route path="/activity/:id" element={<ActivityDetails />} />
-                    <Route path="/search-results" element={<SearchedActivities categoriesFromApp={categories} />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/profile-user" element={<ProfileUser />} />
-                    <Route path="/dashboard-admin" element={<DashboardAdmin />} />
-                    <Route path="/purchase-list" element={<PurchaseList />} />
-                    <Route path="/forgot-password" element={<ForgotPassword />} />
-                    <Route path="/about-us" element={<AboutUs />} />
-                    <Route path="/contact" element={<Contact />} />
-                    <Route path="/cart" element={<Cart />} />
-                </Routes>
-            </BrowserRouter>
+            <CartProvider>
+                <BrowserRouter>
+                    <Header />
+                    <Routes>
+                        <Route path="/" element={<Index categoriesFromApp={categories} />} />
+                        <Route path="/activities" element={<Activities />} />
+                        <Route path="/activity/:id" element={<ActivityDetails />} />
+                        <Route path="/search-results" element={<SearchedActivities categoriesFromApp={categories} />} />
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/register" element={<Register />} />
+                        <Route path="/profile-user" element={<ProfileUser />} />
+                        <Route path="/dashboard-admin" element={<DashboardAdmin />} />
+                        <Route path="/purchase-list" element={<PurchaseList />} />
+                        <Route path="/forgot-password" element={<ForgotPassword />} />
+                        <Route path="/about-us" element={<AboutUs />} />
+                        <Route path="/contact" element={<Contact />} />
+                        <Route path="/cart" element={<Cart />} />
+                    </Routes>
+                    <Footer />
+                </BrowserRouter>
+            </CartProvider>
         </AuthProvider>
     )
 }

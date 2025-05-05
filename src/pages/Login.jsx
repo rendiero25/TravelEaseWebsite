@@ -65,8 +65,6 @@ export default function Login() {
     return (
         <div className="m-0 p-0 box-border font-primary">
             <div className="flex flex-col items-center justify-between min-h-screen">
-                <Header />
-
                 <div className="flex flex-col justify-between gap-10 5xl:gap-20 w-full">
                     <div className="py-10 px-6 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80 flex justify-center items-center w-full">
                         <form onSubmit={handleSubmit} className="w-full xl:max-w-sm flex flex-col gap-6">
@@ -137,9 +135,6 @@ export default function Login() {
                         </form>
                     </div>
                 </div>
-
-                <div className="w-full"><Footer /></div>
-
             </div>
         </div>
     );

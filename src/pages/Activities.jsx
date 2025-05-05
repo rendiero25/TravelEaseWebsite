@@ -93,8 +93,6 @@ const Activities = () => {
 
     return (
         <div className="m-0 p-0 box-border font-primary">
-            <Header />
-
             <div className="px-6 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80">
                 <div>
                     <div className="py-10 flex flex-col xl:flex-row justify-between items-center xl:items-start">
@@ -214,8 +212,6 @@ const Activities = () => {
                     </div>
                 </div>
             </div>
-
-            <Footer />
         </div>
     )
 }
