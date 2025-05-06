@@ -118,8 +118,8 @@ const Header = () => {
                         </Button>
 
                         <Menu id="basic-menu" anchorEl={anchorEl} open={open} onClose={handleClose} MenuListProps={{'aria-labelledby': 'basic-button',}}>
-                                <MenuItem onClick={handleClose}>Profile</MenuItem>
-                                <MenuItem onClick={handleClose}>Purchase List</MenuItem>
+                                <MenuItem onClick={() => navigate('/profile-user')}>Profile</MenuItem>
+                                <MenuItem onClick={() => navigate('/purchase-list')}>Purchase List</MenuItem>
                                 <MenuItem onClick={() => {handleClose(); logout();}}>Logout</MenuItem>
                         </Menu>
                     </div>
@@ -133,7 +133,7 @@ const Header = () => {
                         </Button>
 
                         <Menu id="basic-menu-admin" anchorEl={anchorElAdmin} open={openAdmin} onClose={handleCloseAdmin} MenuListProps={{'aria-labelledby': 'basic-button-admin',}}>
-                            <MenuItem onClick={handleCloseAdmin}>Profile</MenuItem>
+                            <MenuItem onClick={() => navigate('/profile-admin')}>Profile</MenuItem>
                             <MenuItem onClick={handleCloseAdmin}>Dashboard</MenuItem>
                             <MenuItem onClick={() => { handleCloseAdmin(); logout(); }}>Logout</MenuItem>
                         </Menu>

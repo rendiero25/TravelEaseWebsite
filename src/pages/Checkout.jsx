@@ -1,330 +1,196 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext.jsx";
+import { format } from "date-fns";
 
-import {Container, Typography, Box, Grid, Paper, RadioGroup, Radio, FormControlLabel, Button, Divider, CircularProgress, Alert, TextField } from "@mui/material";
-import { CloudUpload as CloudUploadIcon } from '@mui/icons-material';
-import { styled } from '@mui/material/styles';
+import {
+    Container, Typography, Box, Grid, Paper, Divider, Alert,
+    CircularProgress, Button, TextField, List, ListItem,
+    ListItemText, ListItemAvatar, Avatar, Stepper, Step,
+    StepLabel, Card, CardContent, CardMedia, Radio, RadioGroup,
+    FormControlLabel, FormControl, FormLabel, FormHelperText
+} from "@mui/material";
+import { BiReceipt, BiCreditCard, BiCheckCircle, BiArrowBack, BiUpload } from "react-icons/bi";
+import { MdPayment, MdShoppingCart, MdLocationOn } from "react-icons/md";
 
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-
-const VisuallyHiddenInput = styled('input')({
-    clip: 'rect(0 0 0 0)',
-    clipPath: 'inset(50%)',
-    height: 1,
-    overflow: 'hidden',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    whiteSpace: 'nowrap',
-    width: 1,
-});
+import Header from "../components/Header.jsx";
+import Footer from "../components/Footer.jsx";
 
 const Checkout = () => {
-    const { auth } = useAuth();
     const navigate = useNavigate();
-
-    // State variables
+    const { auth } = useAuth();
     const [transactionDetails, setTransactionDetails] = useState(null);
-    const [paymentMethods, setPaymentMethods] = useState([]);
-    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [timeLeft, setTimeLeft] = useState(30 * 60); // 30 minutes in seconds
-    const [timerActive, setTimerActive] = useState(false);
-    const [paymentProof, setPaymentProof] = useState(null);
-    const [uploadLoading, setUploadLoading] = useState(false);
-    const [imageUrl, setImageUrl] = useState('');
-    const [transactionStatus, setTransactionStatus] = useState('pending');
+    const [paymentMethods, setPaymentMethods] = useState([]);
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
+    const [processingPayment, setProcessingPayment] = useState(false);
+    const [paymentSuccess, setPaymentSuccess] = useState(false);
+    const [activeStep, setActiveStep] = useState(0);
+    const [address, setAddress] = useState({
+        fullName: "",
+        street: "",
+        city: "",
+        province: "",
+        postalCode: "",
+        phone: ""
+    });
+    const [transactionId, setTransactionId] = useState(null);
+    const [proofImage, setProofImage] = useState(null);
+    const [uploadingImage, setUploadingImage] = useState(false);
+    const [proofImageUrl, setProofImageUrl] = useState(null);
+    const [confirmingPayment, setConfirmingPayment] = useState(false);
+    const [confirmationSuccess, setConfirmationSuccess] = useState(false);
+    const fileInputRef = useRef(null);
 
-    // Timer interval reference
-    const timerRef = useRef(null);
+    // Steps for checkout process
+    const steps = ['Review Order', 'Payment Method', 'Upload Proof', 'Confirmation'];
 
     useEffect(() => {
-        // Redirect if not logged in
+        // Check if user is logged in
         if (!auth.isLoggedIn) {
             navigate('/login');
             return;
         }
 
         // Get transaction details from session storage
-        const storedDetails = sessionStorage.getItem('transactionDetails');
-        if (!storedDetails) {
-            navigate('/cart');
-            return;
-        }
+        const getTransactionFromStorage = () => {
+            try {
+                const storedTransaction = sessionStorage.getItem('transactionDetails');
+                if (!storedTransaction) {
+                    throw new Error('No transaction details found. Please return to cart.');
+                }
 
-        try {
-            const parsedDetails = JSON.parse(storedDetails);
-            console.log("Loaded transaction details from session storage:", parsedDetails);
+                const parsedTransaction = JSON.parse(storedTransaction);
+                console.log("Retrieved transaction details:", parsedTransaction);
+                setTransactionDetails(parsedTransaction);
 
-            // Validasi transaksi
-            if (!parsedDetails.transactionId) {
-                setError("Transaction ID is missing. Please go back to cart and try again.");
-                navigate('/cart');
-                return;
-            }
+                // If transaction has a payment method, set it as selected
+                if (parsedTransaction.paymentMethodId) {
+                    setSelectedPaymentMethod(parsedTransaction.paymentMethodId);
+                }
 
-            // Update state with transaction details
-            setTransactionDetails(parsedDetails);
-
-            // Fetch payment methods
-            fetchPaymentMethods();
-
-            // Aktifkan timer karena transaksi sudah dibuat
-            setTimerActive(true);
-        } catch (error) {
-            console.error("Error parsing transaction details:", error);
-            navigate('/cart');
-            return;
-        }
-
-        // Cleanup function
-        return () => {
-            if (timerRef.current) {
-                clearInterval(timerRef.current);
+                setLoading(false);
+            } catch (err) {
+                console.error("Failed to retrieve transaction details", err);
+                setError('Failed to load transaction details. Please return to cart.');
+                setLoading(false);
             }
         };
-    }, [auth.isLoggedIn, navigate]);
 
-
-    // Effect for timer functionality
-    useEffect(() => {
-        if (timerActive && timeLeft > 0) {
-            timerRef.current = setInterval(() => {
-                setTimeLeft((prev) => {
-                    if (prev <= 1) {
-                        clearInterval(timerRef.current);
-                        setTimerActive(false);
-                        return 0;
+        // Fetch available payment methods
+        const fetchPaymentMethods = async () => {
+            try {
+                const config = {
+                    headers: {
+                        'apiKey': '24405e01-fbc1-45a5-9f5a-be13afcd757c'
                     }
-                    return prev - 1;
-                });
-            }, 1000);
-        }
+                };
 
-        return () => {
-            if (timerRef.current) {
-                clearInterval(timerRef.current);
-            }
-        };
-    }, [timerActive, timeLeft]);
-
-    const fetchPaymentMethods = async () => {
-        try {
-            setLoading(true);
-
-            const config = {
-                headers: {
-                    'apiKey': '24405e01-fbc1-45a5-9f5a-be13afcd757c',
-                    'Authorization': `Bearer ${auth.token}`
-                }
-            };
-
-            const response = await axios.get(
-                'https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/payment-methods',
-                config
-            );
-
-            setPaymentMethods(response.data.data || []);
-
-            // Set the payment method yang sama dengan yang digunakan untuk membuat transaksi
-            if (transactionDetails?.paymentMethodId) {
-                setSelectedPaymentMethod(transactionDetails.paymentMethodId);
-            }
-            // Fallback ke metode pertama jika tidak ada
-            else if (response.data.data && response.data.data.length > 0) {
-                setSelectedPaymentMethod(response.data.data[0].id);
-            }
-
-            setLoading(false);
-        } catch (err) {
-            console.error("Failed to fetch payment methods", err);
-            setError('Failed to load payment methods');
-            setLoading(false);
-        }
-    };
-
-    const formatTime = (seconds) => {
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = seconds % 60;
-        return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-    };
-
-    const handlePayment = async () => {
-        if (!selectedPaymentMethod) {
-            setError('Please select a payment method');
-            return;
-        }
-
-        try {
-            setLoading(true);
-            console.log("Transaction details:", transactionDetails);
-
-            // Setup API request configuration
-            const config = {
-                headers: {
-                    'apiKey': '24405e01-fbc1-45a5-9f5a-be13afcd757c',
-                    'Authorization': `Bearer ${auth.token}`,
-                    'Content-Type': 'application/json'
-                }
-            };
-
-            // Gunakan cartIds dari transactionDetails yang sudah ada di session storage
-            let cartIds = [];
-
-            if (transactionDetails.cartIds && Array.isArray(transactionDetails.cartIds) && transactionDetails.cartIds.length > 0) {
-                // Gunakan cartIds yang sudah ada di transactionDetails
-                cartIds = transactionDetails.cartIds;
-                console.log("Using cartIds from session storage:", cartIds);
-            } else {
-                // Fallback: Get cart data from API
-                const cartResponse = await axios.get(
-                    'https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/carts',
+                const response = await axios.get(
+                    'https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/payment-methods',
                     config
                 );
 
-                const userCarts = cartResponse.data.data || [];
-                console.log("User carts:", userCarts);
-
-                if (userCarts.length === 0) {
-                    setError('You have no items in your cart');
-                    setLoading(false);
-                    return;
-                }
-
-                // Extract cart IDs
-                cartIds = userCarts.map(cart => cart.id);
+                setPaymentMethods(response.data.data || []);
+            } catch (err) {
+                console.error("Failed to fetch payment methods", err);
+                // Don't set error here, as it's not critical
             }
+        };
 
-            console.log("Cart IDs to be used:", cartIds);
+        getTransactionFromStorage();
+        fetchPaymentMethods();
+    }, [auth.isLoggedIn, auth.token, navigate]);
 
-            // Prepare transaction data with valid cart IDs
-            const transactionData = {
-                cartIds: cartIds,
-                paymentMethodId: selectedPaymentMethod.toString()
-            };
+    const handleAddressChange = (e) => {
+        const { name, value } = e.target;
+        setAddress(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
 
-            // Add promo code if available
-            if (transactionDetails.promoCode && transactionDetails.promoCode !== "None") {
-                transactionData.promoCode = transactionDetails.promoCode;
-            }
+    const handlePaymentMethodSelect = (id) => {
+        setSelectedPaymentMethod(id);
+    };
 
-            console.log("Creating transaction with data:", transactionData);
-
-            // Create transaction API call
-            const response = await axios.post(
-                'https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/create-transaction',
-                transactionData,
-                config
-            );
-
-            console.log("Transaction created successfully:", response.data);
-
-            // Logika untuk menangani berbagai format respons API
-            let transactionId = null;
-
-            // Coba ambil ID dari respons langsung
-            if (response.data && response.data.data && response.data.data.id) {
-                transactionId = response.data.data.id;
-                console.log("Transaction ID extracted from response:", transactionId);
-            }
-            // Jika tidak ada ID dalam respons tapi ada pesan sukses, coba ambil dari API transaksi
-            else if (response.data && response.data.message === "Transaction Created") {
-                try {
-                    // Ambil transaksi terbaru dari API
-                    const transactionsResponse = await axios.get(
-                        'https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/user-transactions',
-                        config
-                    );
-
-                    // Jika ada transaksi, ambil yang terbaru
-                    const transactions = transactionsResponse.data.data || [];
-
-                    if (transactions.length > 0) {
-                        // Ambil ID dari transaksi terbaru
-                        const latestTransaction = transactions[0];
-                        transactionId = latestTransaction.id;
-                        console.log("Transaction ID obtained from latest transaction:", transactionId);
-                    } else {
-                        throw new Error("No transactions found after creation");
-                    }
-                } catch (fetchErr) {
-                    console.error("Error fetching transaction details after creation:", fetchErr);
-                    throw new Error("Could not retrieve transaction ID after creation");
-                }
-            } else {
-                throw new Error("Transaction ID not found in API response");
-            }
-
-            // CRITICAL: Pastikan kita mendapatkan transactionId yang valid
-            if (!transactionId) {
-                throw new Error("Failed to get valid transaction ID");
-            }
-
-            // Update transaction details with real transaction ID
-            const updatedTransactionDetails = {
-                ...transactionDetails,
-                transactionId: transactionId, // Gunakan ID yang valid dari API
-                cartIds: cartIds,
-                // Tambahkan data lain yang mungkin ada dari respons API
-                orderDate: new Date().toISOString(),
-                status: 'pending'
-            };
-
-            // Update state dan session storage
-            setTransactionDetails(updatedTransactionDetails);
-            sessionStorage.setItem('transactionDetails', JSON.stringify(updatedTransactionDetails));
-
-            // Aktivasi timer pembayaran
-            setTimerActive(true);
-            setLoading(false);
-        } catch (err) {
-            console.error("Failed to create transaction", err);
-
-            // Handle error responses
-            if (err.response) {
-                console.error("Error status:", err.response.status);
-                console.error("Error data:", err.response.data);
-
-                if (err.response.data?.errors) {
-                    setError(`Transaction Error: ${err.response.data.errors}`);
-                } else if (err.response.data?.message) {
-                    setError(`Transaction Error: ${err.response.data.message}`);
-                } else {
-                    setError("Server returned an error. Please try again.");
-                }
-            } else if (err.request) {
-                setError("No response from server. Please check your internet connection.");
-            } else {
-                setError(`Request error: ${err.message}`);
-            }
-
-            setLoading(false);
+    const handleFileSelect = (e) => {
+        if (e.target.files && e.target.files[0]) {
+            setProofImage(e.target.files[0]);
         }
     };
 
 
-    const handleCancelTransaction = async () => {
-        if (!transactionDetails?.transactionId) {
-            setError('Transaction ID not found');
-            return;
-        }
 
-        // Jika ID transaksi adalah temporary, kita tidak perlu memanggil API cancel
-        if (transactionDetails.isTemporary) {
-            // Cukup clear session storage dan navigate ke halaman activities
-            sessionStorage.removeItem('transactionDetails');
-            navigate('/activities');
-            return;
-        }
 
+    // const handleNext = () => {
+    //     if (activeStep === 1) {
+    //         // Validate first step (order review)
+    //         if (!transactionDetails || !transactionDetails.cartIds || transactionDetails.cartIds.length === 0) {
+    //             setError('No items in cart to checkout');
+    //             return;
+    //         }
+    //     } else if (activeStep === 1) {
+    //         // Validate payment method selection
+    //         if (!selectedPaymentMethod) {
+    //             setError('Please select a payment method');
+    //             return;
+    //         }
+    //         // Create transaction
+    //         createTransaction();
+    //         return; // Don't increment step yet - wait for API response
+    //     } else if (activeStep === 2) {
+    //         // Validate proof image upload
+    //         if (!proofImage && !proofImageUrl) {
+    //             setError('Please upload payment proof');
+    //             return;
+    //         }
+    //         // Upload proof image if not already uploaded
+    //         if (proofImage && !proofImageUrl) {
+    //             uploadProofImage();
+    //             return; // Don't increment step yet - wait for API response
+    //         }
+    //         // If image already uploaded, update transaction with proof
+    //         if (proofImageUrl) {
+    //             updateTransactionWithProof();
+    //             return; // Don't increment step yet - wait for API response
+    //         }
+    //     }
+    //
+    //     setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    // };
+
+    const handleBack = () => {
+        setActiveStep((prevActiveStep) => prevActiveStep - 1);
+    };
+
+    const createTransaction = async () => {
         try {
-            setLoading(true);
+            setProcessingPayment(true);
 
+            // Make sure we have the correct cartIds format from transactionDetails
+            const cartIds = transactionDetails.items.map(item => item.id);
+
+            // Make sure we have a payment method selected
+            if (!selectedPaymentMethod) {
+                setError("Please select a payment method");
+                setProcessingPayment(false);
+                return;
+            }
+
+
+
+            // // Prepare the API request payload
+            // const paymentData = {
+            //     paymentMethodId: selectedPaymentMethod,
+            //     cartIds: cartIds // Add this line to include the cartIds array
+            // };
+
+            // console.log("Payment data being sent:", paymentData);
+
+            // Make the API call to create transaction
             const config = {
                 headers: {
                     'apiKey': '24405e01-fbc1-45a5-9f5a-be13afcd757c',
@@ -332,55 +198,142 @@ const Checkout = () => {
                 }
             };
 
-            const response = await axios.put(
-                `https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/cancel-transaction/${transactionDetails.transactionId}`,
-                {},
+            const payload = {
+                paymentMethodId: selectedPaymentMethod,
+                cartIds: cartIds // Using properly formatted cart IDs
+            };
+
+            console.log("Transaction payload:", payload);
+
+
+            const response = await axios.post(
+                'https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/create-transaction',
+                payload,
                 config
             );
 
-            console.log("Transaction cancelled successfully:", response.data);
+            console.log("Transaction created:", response.data);
 
-            // Clear session storage
-            sessionStorage.removeItem('transactionDetails');
 
-            // Navigate to activities page
-            navigate('/activities');
+            // Store transaction ID for next steps
+            // setTransactionId(response.data.data.id);
+            setPaymentSuccess(true);
+            setActiveStep(2); // Move to upload proof step
 
         } catch (err) {
-            console.error("Failed to cancel transaction", err);
-
-            if (err.response) {
-                if (err.response.data?.message) {
-                    setError(`Cancel transaction error: ${err.response.data.message}`);
-                } else {
-                    setError(`Failed to cancel transaction (status ${err.response.status})`);
-                }
-            } else {
-                setError('Failed to cancel transaction');
-            }
-
-            setLoading(false);
+            console.error("Failed to create transaction", err);
+            setError('Failed to process payment. Please try again.');
+        } finally {
+            setProcessingPayment(false);
         }
     };
 
+    // const createTransaction = async (paymentMethodId) => {
+    //     if (!paymentMethodId) {
+    //         setError('Payment method is required');
+    //         return;
+    //     }
+    //
+    //     try {
+    //         setProcessingPayment(true);
+    //         setError(null);
+    //
+    //         // Your transaction creation code...
+    //         const config = {
+    //             headers: {
+    //                 'apiKey': '24405e01-fbc1-45a5-9f5a-be13afcd757c',
+    //                 'Authorization': `Bearer ${auth.token}`
+    //             }
+    //         };
+    //
+    //         // Make sure all required data is available
+    //         if (!transactionDetails || !transactionDetails.items || transactionDetails.items.length === 0) {
+    //             throw new Error('Transaction details are incomplete');
+    //         }
+    //
+    //         // Extract cart IDs from transaction items
+    //         const cartIds = transactionDetails.items.map(item => item.cartId);
+    //
+    //         if (!cartIds.length) {
+    //             throw new Error('No cart items found');
+    //         }
+    //
+    //
+    //         const response = await axios.post(
+    //             'https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/create-transaction',
+    //             {
+    //                 paymentMethodId: paymentMethodId,
+    //                 // Include other required transaction data here
+    //                 cartIds: cartIds
+    //                 // Make sure any other required fields are included
+    //             },
+    //             config
+    //         );
+    //
+    //         // Handle successful transaction
+    //         console.log("Transaction created successfully:", response.data);
+    //         setTransactionId(response.data.data.id);
+    //         setPaymentSuccess(true);
+    //         setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    //
+    //     } catch (err) {
+    //         console.error("Transaction creation error:", err);
+    //         setError(err.response?.data?.message || 'Failed to create transaction');
+    //     } finally {
+    //         setProcessingPayment(false);
+    //     }
+    // };
 
-    const handleFileChange = (event) => {
-        if (event.target.files && event.target.files[0]) {
-            setPaymentProof(event.target.files[0]);
-        }
-    };
+    // const createTransaction = async () => {
+    //     try {
+    //         setProcessingPayment(true);
+    //         setError(null);
+    //
+    //         const config = {
+    //             headers: {
+    //                 'apiKey': '24405e01-fbc1-45a5-9f5a-be13afcd757c',
+    //                 'Authorization': `Bearer ${auth.token}`
+    //             }
+    //         };
+    //
+    //         const data = {
+    //             cartIds: transactionDetails.cartIds,
+    //             paymentMethodId: selectedPaymentMethod
+    //         };
+    //
+    //         const response = await axios.post(
+    //             'https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/create-transaction',
+    //             data,
+    //             config
+    //         );
+    //
+    //         if (response.data && response.data.status === 'OK') {
+    //             setTransactionId(response.data.data.id);
+    //             // Move to next step after transaction created
+    //             setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    //         } else {
+    //             throw new Error(response.data?.message || 'Failed to create transaction');
+    //         }
+    //     } catch (err) {
+    //         console.error("Failed to create transaction", err);
+    //         setError(err.response?.data?.message || 'Failed to create transaction. Please try again.');
+    //     } finally {
+    //         setProcessingPayment(false);
+    //     }
+    // };
 
-    const handleFileUpload = async () => {
-        if (!paymentProof) {
-            setError('Please select a file to upload');
+    const uploadProofImage = async () => {
+        if (!proofImage) {
+            setError('No image selected');
             return;
         }
 
         try {
-            setUploadLoading(true);
+            setUploadingImage(true);
+            setError(null);
 
             const formData = new FormData();
-            formData.append('image', paymentProof);
+            formData.append('image', proofImage);
 
             const config = {
                 headers: {
@@ -390,437 +343,427 @@ const Checkout = () => {
                 }
             };
 
-            console.log("Uploading payment proof...");
-
             const response = await axios.post(
                 'https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/upload-image',
                 formData,
                 config
             );
 
-            console.log("Upload response:", response.data);
-
-            // Variabel untuk menyimpan URL gambar
-            let imgUrl = '';
-
-            // Periksa beberapa kemungkinan struktur respons
-            if (response.data && response.data.data && response.data.data.imageUrl) {
-                imgUrl = response.data.data.imageUrl;
-            } else if (response.data && response.data.data && response.data.data.url) {
-                imgUrl = response.data.data.url;
-            } else if (response.data && response.data.imageUrl) {
-                imgUrl = response.data.imageUrl;
-            } else if (response.data && response.data.url) {
-                imgUrl = response.data.url;
-            } else if (response.data && typeof response.data === 'string' && response.data.startsWith('http')) {
-                // Jika responsnya langsung string URL
-                imgUrl = response.data;
+            if (response.data && response.data.status === 'OK') {
+                setProofImageUrl(response.data.data.imageUrl);
+                // Now update the transaction with the proof URL
+                await updateTransactionWithProof(response.data.data.imageUrl);
             } else {
-                // Tidak ada URL gambar dalam respons
-                console.error("Image URL not found in response structure:", response.data);
-                throw new Error("Could not find image URL in server response");
+                throw new Error(response.data?.message || 'Failed to upload image');
             }
-
-            // Set image URL state
-            setImageUrl(imgUrl);
-            console.log("Image uploaded successfully, URL:", imgUrl);
-
-            setUploadLoading(false);
-
         } catch (err) {
-            console.error("Failed to upload image", err);
-
-            if (err.response) {
-                console.error("Error response data:", err.response.data);
-
-                if (err.response.data && err.response.data.message) {
-                    setError(`Upload failed: ${err.response.data.message}`);
-                } else {
-                    setError(`Upload failed with status ${err.response.status}`);
-                }
-            } else if (err.request) {
-                setError("No response from server. Please check your network connection.");
-            } else {
-                setError(`Upload error: ${err.message}`);
-            }
-
-            setUploadLoading(false);
+            console.error("Failed to upload proof image", err);
+            setError(err.response?.data?.message || 'Failed to upload proof image. Please try again.');
+        } finally {
+            setUploadingImage(false);
         }
     };
 
-    const handleConfirmPayment = async () => {
-        if (!imageUrl) {
-            setError('Please upload proof of payment first');
-            return;
-        }
-
-        if (!transactionDetails?.transactionId) {
-            setError('Transaction ID not found. Please try creating the transaction again.');
-            return;
-        }
-
-        // Hanya lanjutkan jika transactionId bukan string "TEMP-..."
-        if (transactionDetails.transactionId.toString().startsWith('TEMP-')) {
-            setError('Invalid transaction ID. Please try creating the transaction again by clicking Pay Now.');
+    const updateTransactionWithProof = async (imageUrl = null) => {
+        if (!transactionId) {
+            setError('Transaction ID is missing');
             return;
         }
 
         try {
-            setLoading(true);
-            console.log(`Confirming payment for transaction ${transactionDetails.transactionId} with image URL: ${imageUrl}`);
+            setConfirmingPayment(true);
+            setError(null);
 
             const config = {
                 headers: {
                     'apiKey': '24405e01-fbc1-45a5-9f5a-be13afcd757c',
-                    'Authorization': `Bearer ${auth.token}`,
-                    'Content-Type': 'application/json'
+                    'Authorization': `Bearer ${auth.token}`
                 }
             };
 
-            // Step 1: Update transaction with proof of payment
-            const updatePaymentResponse = await axios.put(
-                `https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/update-transaction-proof-payment/${transactionDetails.transactionId}`,
-                { imageUrl },
+            const data = {
+                proofPaymentUrl: imageUrl || proofImageUrl
+            };
+
+            const response = await axios.post(
+                `https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/update-transaction-proof-payment/${transactionId}`,
+                data,
                 config
             );
 
-            console.log("Proof of payment updated successfully:", updatePaymentResponse.data);
+            if (response.data && response.data.status === 'OK') {
+                // For demo purposes, let's simulate automatic transaction confirmation
+                await simulateAdminConfirmation();
 
-            // Step 2: Update transaction status to 'paid'
-            const updateStatusResponse = await axios.put(
-                `https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/update-transaction-status/${transactionDetails.transactionId}`,
-                { status: 'paid' },
-                config
-            );
-
-            console.log("Transaction status updated successfully:", updateStatusResponse.data);
-
-            // Update local status
-            setTransactionStatus('paid');
-            setLoading(false);
-
-            // Clear cart menggunakan deleteCart API untuk setiap item
-            try {
-                if (transactionDetails.cartIds && Array.isArray(transactionDetails.cartIds)) {
-                    // Hapus semua cart item secara async
-                    await Promise.all(transactionDetails.cartIds.map(cartId =>
-                        axios.delete(
-                            `https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/delete-cart/${cartId}`,
-                            config
-                        )
-                    ));
-                    console.log("Cart items cleared successfully");
-                }
-            } catch (clearCartErr) {
-                console.error("Failed to clear cart after payment", clearCartErr);
-                // Tidak menampilkan error ke user karena ini bukan operasi kritis
-            }
-
-        } catch (err) {
-            console.error("Failed to confirm payment", err);
-
-            if (err.response) {
-                console.error("Error response:", err.response.data);
-
-                if (err.response.status === 404) {
-                    setError(`Transaction with ID ${transactionDetails.transactionId} was not found. Please try creating the transaction again.`);
-                } else if (err.response.data?.message) {
-                    setError(`Payment confirmation failed: ${err.response.data.message}`);
-                } else {
-                    setError(`Payment confirmation failed with status ${err.response.status}`);
-                }
-            } else if (err.request) {
-                setError("No response from server. Please check your internet connection.");
+                // Advance to final step
+                setActiveStep((prevActiveStep) => prevActiveStep + 1);
             } else {
-                setError(`Payment confirmation error: ${err.message}`);
+                throw new Error(response.data?.message || 'Failed to update transaction with payment proof');
             }
-
-            setLoading(false);
+        } catch (err) {
+            console.error("Failed to update transaction with proof", err);
+            setError(err.response?.data?.message || 'Failed to update transaction with payment proof. Please try again.');
+        } finally {
+            setConfirmingPayment(false);
         }
     };
 
+    // Simulate admin confirmation (for demo purposes)
+    const simulateAdminConfirmation = async () => {
+        try {
+            const config = {
+                headers: {
+                    'apiKey': '24405e01-fbc1-45a5-9f5a-be13afcd757c',
+                    'Authorization': `Bearer ${auth.token}` // Using user token for demo
+                }
+            };
 
-    if (loading && !transactionDetails) {
-        return (
-            <div className="min-h-screen flex flex-col">
-                <Header />
-                <div className="flex-grow flex items-center justify-center">
-                    <CircularProgress />
-                </div>
-                <Footer />
-            </div>
-        );
-    }
+            const data = {
+                status: "success"
+            };
+
+            const response = await axios.post(
+                `https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/update-transaction-status/${transactionId}`,
+                data,
+                config
+            );
+
+            if (response.data && response.data.status === 'OK') {
+                setConfirmationSuccess(true);
+                // Clear transaction from session storage as it's complete
+                sessionStorage.removeItem('transactionDetails');
+            }
+        } catch (err) {
+            console.error("Failed to confirm transaction (simulation)", err);
+            // Don't fail the whole process if this fails, as it's just a simulation
+        }
+    };
+
+    const handleFinish = () => {
+        // Navigate to purchase history or home
+        navigate('/purchase-list');
+    };
+
+    const handleNext = () => {
+        if (activeStep === 1) { // Payment Method step
+            // Make sure selectedPaymentMethod is not null before proceeding
+            if (!selectedPaymentMethod) {
+                setError('Please select a payment method before proceeding');
+                return;
+            }
+
+            // Find the selected payment method object
+            const selectedMethod = paymentMethods.find(method => method.id === selectedPaymentMethod);
+
+            if (!selectedMethod) {
+                setError('Invalid payment method selected');
+                return;
+            }
+
+            // Now proceed with transaction creation using selectedMethod.id
+            createTransaction(selectedMethod.id);
+        } else {
+            // Handle other steps
+            setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        }
+    };
+
+    const renderStepContent = () => {
+        switch (activeStep) {
+            case 0:
+                return (
+                    <Box>
+                        <Typography variant="h6" gutterBottom>
+                            Review Your Order
+                        </Typography>
+                        {transactionDetails && transactionDetails.items && (
+                            <>
+                                <List>
+                                    {transactionDetails.items.map((item) => (
+                                        <ListItem key={item.id} sx={{ mb: 2, border: '1px solid #eee', borderRadius: 2 }}>
+                                            <ListItemAvatar>
+                                                <Avatar
+                                                    variant="rounded"
+                                                    src={item.activity?.imageUrls?.[0] || ''}
+                                                    sx={{ width: 80, height: 80, mr: 2 }}
+                                                />
+                                            </ListItemAvatar>
+                                            <ListItemText
+                                                primary={item.activity?.title || 'Activity'}
+                                                secondary={
+                                                    <>
+                                                        <Typography component="span" variant="body2" color="text.primary">
+                                                            Quantity: {item.quantity || 1}
+                                                        </Typography>
+                                                        <br />
+                                                        <Typography component="span" variant="body2">
+                                                            Price: ${item.activity?.price?.toFixed(2) || '0.00'}
+                                                        </Typography>
+                                                    </>
+                                                }
+                                            />
+                                            <Typography variant="body1" fontWeight="bold">
+                                                ${(item.activity?.price * (item.quantity || 1)).toFixed(2)}
+                                            </Typography>
+                                        </ListItem>
+                                    ))}
+                                </List>
+                                <Divider sx={{ my: 2 }} />
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                                    <Typography variant="body1">Subtotal:</Typography>
+                                    <Typography variant="body1">${transactionDetails.subtotal?.toFixed(2) || '0.00'}</Typography>
+                                </Box>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                                    <Typography variant="body1">Discount:</Typography>
+                                    <Typography variant="body1">-${transactionDetails.discount?.toFixed(2) || '0.00'}</Typography>
+                                </Box>
+                                <Divider sx={{ my: 2 }} />
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                                    <Typography variant="h6">Total:</Typography>
+                                    <Typography variant="h6" color="primary">${transactionDetails.total?.toFixed(2) || '0.00'}</Typography>
+                                </Box>
+                            </>
+                        )}
+                    </Box>
+                );
+            case 1:
+                return (
+                    <Box>
+                        <Typography variant="h6" gutterBottom>
+                            Select Payment Method
+                        </Typography>
+                        {processingPayment ? (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+                                <CircularProgress />
+                            </Box>
+                        ) : (
+                            <FormControl component="fieldset" fullWidth>
+                                <RadioGroup
+                                    value={selectedPaymentMethod || ''}
+                                    onChange={(e) => handlePaymentMethodSelect(e.target.value)}
+                                >
+                                    {paymentMethods.map((method) => (
+                                        <Paper
+                                            key={method.id}
+                                            sx={{
+                                                mb: 2,
+                                                p: 2,
+                                                border: selectedPaymentMethod === method.id ? '2px solid #1976d2' : '1px solid #eee',
+                                                borderRadius: 2,
+                                                cursor: 'pointer'
+                                            }}
+                                            onClick={() => handlePaymentMethodSelect(method.id)}
+                                        >
+                                            <FormControlLabel
+                                                value={method.id}
+                                                control={<Radio />}
+                                                label={
+                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                        <Box sx={{ mr: 2 }}>
+                                                            <BiCreditCard size={24} />
+                                                        </Box>
+                                                        <Box>
+                                                            <Typography variant="body1">{method.name}</Typography>
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                {method.description || 'Pay with this method'}
+                                                            </Typography>
+                                                        </Box>
+                                                    </Box>
+                                                }
+                                                sx={{ width: '100%', margin: 0 }}
+                                            />
+                                        </Paper>
+                                    ))}
+                                </RadioGroup>
+                            </FormControl>
+                        )}
+                    </Box>
+                );
+            case 2:
+                return (
+                    <Box>
+                        <Typography variant="h6" gutterBottom>
+                            Upload Payment Proof
+                        </Typography>
+                        <Paper sx={{ p: 3, mb: 3, border: '1px dashed #1976d2', borderRadius: 2 }}>
+                            <Box sx={{ textAlign: 'center' }}>
+                                {proofImageUrl ? (
+                                    <Box>
+                                        <img
+                                            src={proofImageUrl}
+                                            alt="Payment proof"
+                                            style={{ maxWidth: '100%', maxHeight: '200px', marginBottom: '16px' }}
+                                        />
+                                        <Typography variant="body2" color="success.main" gutterBottom>
+                                            Image uploaded successfully!
+                                        </Typography>
+                                        <Button
+                                            variant="outlined"
+                                            startIcon={<BiUpload />}
+                                            onClick={() => fileInputRef.current.click()}
+                                            sx={{ mt: 1 }}
+                                        >
+                                            Change Image
+                                        </Button>
+                                    </Box>
+                                ) : (
+                                    <Box>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            style={{ display: 'none' }}
+                                            ref={fileInputRef}
+                                            onChange={handleFileSelect}
+                                        />
+                                        <Button
+                                            variant="outlined"
+                                            startIcon={<BiUpload />}
+                                            onClick={() => fileInputRef.current.click()}
+                                            sx={{ mb: 2 }}
+                                        >
+                                            {proofImage ? 'Change Image' : 'Select Image'}
+                                        </Button>
+                                        {proofImage && (
+                                            <Typography variant="body2" color="text.secondary">
+                                                Selected: {proofImage.name}
+                                            </Typography>
+                                        )}
+                                        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                                            Please upload a clear image of your payment receipt or screenshot.
+                                        </Typography>
+                                    </Box>
+                                )}
+                            </Box>
+                        </Paper>
+
+                        {uploadingImage && (
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', my: 2 }}>
+                                <CircularProgress size={24} sx={{ mb: 1 }} />
+                                <Typography variant="body2" color="text.secondary">
+                                    Uploading image...
+                                </Typography>
+                            </Box>
+                        )}
+
+                        {confirmingPayment && (
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', my: 2 }}>
+                                <CircularProgress size={24} sx={{ mb: 1 }} />
+                                <Typography variant="body2" color="text.secondary">
+                                    Confirming payment...
+                                </Typography>
+                            </Box>
+                        )}
+                    </Box>
+                );
+            case 3:
+                return (
+                    <Box sx={{ textAlign: 'center', py: 3 }}>
+                        <BiCheckCircle size={64} color="#4caf50" />
+                        <Typography variant="h5" color="success.main" gutterBottom sx={{ mt: 2 }}>
+                            Payment Successful!
+                        </Typography>
+                        <Typography variant="body1" paragraph>
+                            Your transaction has been completed successfully.
+                        </Typography>
+                        <Typography variant="body1" paragraph>
+                            Transaction ID: {transactionId}
+                        </Typography>
+                        <Typography variant="body1" paragraph>
+                            Date: {format(new Date(), 'PPP')}
+                        </Typography>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            size="large"
+                            sx={{ mt: 2 }}
+                            onClick={handleFinish}
+                        >
+                            View Purchase History
+                        </Button>
+                    </Box>
+                );
+            default:
+                return null;
+        }
+    };
 
     return (
-        <div className="m-0 p-0 box-border font-primary">
+        <>
             <Header />
-            <div className="px-6 py-10 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80">
-                <div className="min-h-screen flex flex-col">
-                    <Container maxWidth="lg" className="flex-grow my-8">
-                        <Typography variant="h4" gutterBottom className="font-semibold">
+            <Container maxWidth="md" sx={{ mt: 8, mb: 6 }}>
+                <Paper sx={{ p: 3, borderRadius: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                        <MdShoppingCart size={28} style={{ marginRight: '8px' }} />
+                        <Typography variant="h5" component="h1">
                             Checkout
                         </Typography>
+                    </Box>
 
-                        {error && (
-                            <Alert severity="error" className="mb-4" onClose={() => setError(null)}>
-                                {error}
-                            </Alert>
-                        )}
+                    {error && (
+                        <Alert severity="error" sx={{ mb: 3 }}>
+                            {error}
+                        </Alert>
+                    )}
 
-                        {transactionStatus === 'paid' ? (
-                            <Paper className="p-6 mt-4">
-                                <Alert severity="success" className="mb-4">
-                                    Payment successful! Thank you for your purchase.
-                                </Alert>
+                    {loading ? (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+                            <CircularProgress />
+                        </Box>
+                    ) : (
+                        <>
+                            <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+                                {steps.map((label) => (
+                                    <Step key={label}>
+                                        <StepLabel>{label}</StepLabel>
+                                    </Step>
+                                ))}
+                            </Stepper>
+
+                            <Box sx={{ mt: 2, mb: 4 }}>
+                                {renderStepContent()}
+                            </Box>
+
+                            <Divider sx={{ my: 3 }} />
+
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                 <Button
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={() => navigate('/purchase-list')}
-                                    className="mt-4"
+                                    disabled={activeStep === 0 || activeStep === steps.length - 1}
+                                    onClick={handleBack}
+                                    startIcon={<BiArrowBack />}
                                 >
-                                    View My Purchases
+                                    Back
                                 </Button>
-                            </Paper>
-                        ) : (
-                            <Grid container spacing={4}>
-                                <Grid item xs={12} md={8}>
-                                    <Paper className="p-6">
-                                        <Typography variant="h6" className="font-semibold mb-4">
-                                            Order Details
-                                        </Typography>
-
-                                        {transactionDetails?.items && transactionDetails.items.length > 0 ? (
-                                            transactionDetails.items.map((item, index) => (
-                                                <Box key={index} className="mb-4">
-                                                    <Grid container spacing={2}>
-                                                        <Grid item xs={12} sm={3}>
-                                                            {item.imageUrl && (
-                                                                <img
-                                                                    src={item.imageUrl}
-                                                                    alt={item.title}
-                                                                    className="w-full h-24 object-cover rounded"
-                                                                    onError={(e) => {
-                                                                        e.target.onerror = null;
-                                                                        e.target.src = "https://via.placeholder.com/150?text=Image+Not+Available";
-                                                                    }}
-                                                                />
-                                                            )}
-                                                        </Grid>
-                                                        <Grid item xs={12} sm={9}>
-                                                            <Typography variant="h6" className="font-semibold">
-                                                                {item.title}
-                                                            </Typography>
-                                                            <Typography variant="body2" className="text-gray-600 mb-1">
-                                                                {item.city}, {item.province}
-                                                            </Typography>
-                                                            <Typography variant="body2" className="mb-1">
-                                                                Quantity: {item.quantity}
-                                                            </Typography>
-                                                            <Typography variant="body1" className="font-semibold">
-                                                                Rp {(item.price * item.quantity).toLocaleString('id-ID')}
-                                                            </Typography>
-                                                        </Grid>
-                                                    </Grid>
-                                                    {index < transactionDetails.items.length - 1 && (
-                                                        <Divider className="my-4" />
-                                                    )}
-                                                </Box>
-                                            ))
-                                        ) : (
-                                            <Typography variant="body1">No items in cart</Typography>
-                                        )}
-                                    </Paper>
-
-                                    <Paper className="p-6 mt-4">
-                                        <Typography variant="h6" className="font-semibold mb-4">
-                                            Payment Method
-                                        </Typography>
-
-                                        {paymentMethods.length > 0 ? (
-                                            <RadioGroup
-                                                value={selectedPaymentMethod}
-                                                onChange={(e) => setSelectedPaymentMethod(e.target.value)}
-                                            >
-                                                {paymentMethods.map((method) => (
-                                                    <FormControlLabel
-                                                        key={method.id}
-                                                        value={method.id}
-                                                        control={<Radio />}
-                                                        label={
-                                                            <Box className="flex items-center">
-                                                                {method.imageUrl && (
-                                                                    <img
-                                                                        src={method.imageUrl}
-                                                                        alt={method.name}
-                                                                        className="h-6 mr-2"
-                                                                        onError={(e) => {
-                                                                            e.target.onerror = null;
-                                                                            e.target.src = "https://via.placeholder.com/30?text=Bank";
-                                                                        }}
-                                                                    />
-                                                                )}
-                                                                <Typography>{method.name}</Typography>
-                                                            </Box>
-                                                        }
-                                                    />
-                                                ))}
-                                            </RadioGroup>
-                                        ) : (
-                                            <Typography>No payment methods available</Typography>
-                                        )}
-
-                                        {/* Hapus tombol Pay Now karena transaksi sudah dibuat */}
-                                        <Typography variant="body2" color="textSecondary" className="mt-2">
-                                            Your transaction has been created. Please complete payment using the selected method.
-                                        </Typography>
-                                    </Paper>
-
-                                    {timerActive && (
-                                        <Paper className="p-6 mt-4">
-                                            <Typography variant="h6" className="font-semibold mb-2">
-                                                Payment Timer
-                                            </Typography>
-                                            <Typography variant="body1" className="mb-4">
-                                                Please complete your payment within:
-                                            </Typography>
-                                            <Typography variant="h4" className="font-bold text-center mb-4 text-red-500">
-                                                {formatTime(timeLeft)}
-                                            </Typography>
-                                            <Button
-                                                variant="outlined"
-                                                color="error"
-                                                onClick={handleCancelTransaction}
-                                                className="mt-2"
-                                                fullWidth
-                                                disabled={loading}
-                                            >
-                                                {loading ? <CircularProgress size={24} /> : 'Cancel Transaction'}
-                                            </Button>
-                                        </Paper>
+                                <Box>
+                                    {activeStep === steps.length - 1 ? (
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            onClick={handleFinish}
+                                        >
+                                            Finish
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            onClick={handleNext}
+                                            disabled={
+                                                processingPayment ||
+                                                uploadingImage ||
+                                                confirmingPayment
+                                            }
+                                        >
+                                            {activeStep === steps.length - 2 ? 'Complete' : 'Next'}
+                                        </Button>
                                     )}
-
-                                    {timerActive && (
-                                        <Paper className="p-6 mt-4">
-                                            <Typography variant="h6" className="font-semibold mb-4">
-                                                Already Paid?
-                                            </Typography>
-
-                                            <Box className="mb-4">
-                                                <Button
-                                                    component="label"
-                                                    variant="contained"
-                                                    startIcon={<CloudUploadIcon />}
-                                                    disabled={uploadLoading}
-                                                >
-                                                    Upload proof of payment
-                                                    <VisuallyHiddenInput
-                                                        type="file"
-                                                        onChange={handleFileChange}
-                                                        accept="image/*"
-                                                    />
-                                                </Button>
-                                                {paymentProof && (
-                                                    <Typography variant="body2" className="mt-2">
-                                                        Selected file: {paymentProof.name}
-                                                    </Typography>
-                                                )}
-                                            </Box>
-
-                                            {paymentProof && !imageUrl && (
-                                                <Button
-                                                    variant="outlined"
-                                                    onClick={handleFileUpload}
-                                                    disabled={uploadLoading}
-                                                    className="mb-4"
-                                                >
-                                                    {uploadLoading ? <CircularProgress size={24} /> : 'Upload Image'}
-                                                </Button>
-                                            )}
-
-                                            {imageUrl && (
-                                                <>
-                                                    <Box className="mb-4">
-                                                        <img
-                                                            src={imageUrl}
-                                                            alt="Payment Proof"
-                                                            className="max-w-full h-auto"
-                                                            style={{ maxHeight: '200px' }}
-                                                        />
-                                                    </Box>
-
-                                                    <Button
-                                                        variant="contained"
-                                                        color="success"
-                                                        onClick={handleConfirmPayment}
-                                                        disabled={loading}
-                                                        fullWidth
-                                                    >
-                                                        {loading ? <CircularProgress size={24} /> : 'Confirm Payment'}
-                                                    </Button>
-                                                </>
-                                            )}
-                                        </Paper>
-                                    )}
-                                </Grid>
-
-                                <Grid item xs={12} md={4}>
-                                    <Paper className="p-6 sticky top-4">
-                                        <Typography variant="h6" className="font-semibold mb-4">
-                                            Order Summary
-                                        </Typography>
-
-                                        <Box className="flex justify-between mb-2">
-                                            <Typography>Subtotal</Typography>
-                                            <Typography>
-                                                Rp {(transactionDetails?.subtotal || 0).toLocaleString('id-ID')}
-                                            </Typography>
-                                        </Box>
-
-                                        <Box className="flex justify-between mb-2">
-                                            <Typography>Promo Code</Typography>
-                                            <Typography>
-                                                {transactionDetails?.promoCode || 'None'}
-                                            </Typography>
-                                        </Box>
-
-                                        <Box className="flex justify-between mb-2">
-                                            <Typography>Discount</Typography>
-                                            <Typography>
-                                                - Rp {(transactionDetails?.discount || 0).toLocaleString('id-ID')}
-                                            </Typography>
-                                        </Box>
-
-                                        <Divider className="my-2" />
-
-                                        <Box className="flex justify-between mb-2">
-                                            <Typography variant="h6" className="font-semibold">Total</Typography>
-                                            <Typography variant="h6" className="font-semibold">
-                                                Rp {(transactionDetails?.total || 0).toLocaleString('id-ID')}
-                                            </Typography>
-                                        </Box>
-
-                                        <Box className="mt-4">
-                                            <Typography variant="subtitle2" className="font-semibold mb-1">
-                                                Transaction ID:
-                                            </Typography>
-                                            <TextField
-                                                fullWidth
-                                                variant="outlined"
-                                                size="small"
-                                                value={transactionDetails?.transactionId || 'Not created yet'}
-                                                InputProps={{ readOnly: true }}
-                                            />
-                                        </Box>
-                                    </Paper>
-                                </Grid>
-                            </Grid>
-                        )}
-                    </Container>
-                </div>
-            </div>
+                                </Box>
+                            </Box>
+                        </>
+                    )}
+                </Paper>
+            </Container>
             <Footer />
-        </div>
+        </>
     );
 };
 

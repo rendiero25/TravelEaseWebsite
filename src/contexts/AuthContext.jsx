@@ -29,10 +29,32 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('auth', JSON.stringify(authData));
     };
 
-    const logout = () => {
-        setAuth({isLoggedIn: false, token: null, user: null});
-        localStorage.removeItem('auth');
+    const logout = async () => {
+        try {
+            // Only call the API if user is logged in and has a token
+            if (auth.isLoggedIn && auth.token) {
+                const config = {
+                    headers: {
+                        'apiKey': '24405e01-fbc1-45a5-9f5a-be13afcd757c',
+                        'Authorization': `Bearer ${auth.token}`
+                    }
+                };
+
+                // Call the logout API
+                await axios.get(
+                    'https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/logout',
+                    config
+                );
+            }
+        } catch (error) {
+            console.error("Logout API error:", error);
+        } finally {
+            // Clear auth state and local storage regardless of API success/failure
+            setAuth({isLoggedIn: false, token: null, user: null});
+            localStorage.removeItem('auth');
+        }
     };
+
 
     return (
         <AuthContext.Provider value={{ auth, login, logout }}>
