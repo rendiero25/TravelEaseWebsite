@@ -3,9 +3,6 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import Header from "../components/Header";
-import Footer from "../components/Footer";
-
 import Button from "@mui/material/Button";
 import {BiCommentDots, BiStar} from "react-icons/bi";
 
@@ -64,8 +61,6 @@ const SearchedActivities = ({ categoriesFromApp }) => {
     return (
         <div className="m-0 p-0 box-border font-primary">
             <div className="flex flex-col justify-between">
-                <Header />
-
                 <div className="pt-20 pb-10 flex flex-col items-center xl:items-start justify-between px-6 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80">
                     <div>
                         <h1 className="font-light text-black text-2xl mb-4">Search Results</h1>
@@ -79,7 +74,15 @@ const SearchedActivities = ({ categoriesFromApp }) => {
                                     >
                                         <div className="mt-10 pb-15 flex flex-col xl:flex-row justify-center items-start ">
                                             <div className="flex flex-col justify-between items-start gap-2">
-                                                <img src={act.imageUrls[0]} alt="activities-image" className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"/>
+                                                <img 
+                                                    src={act.imageUrls[0]} 
+                                                    alt="activities-image" 
+                                                    className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
+                                                    onError={event => {
+                                                                event.target.onerror = null;
+                                                                event.target.src = "https://media.universalparksusa.com/wp-content/uploads/2024/02/Universal-Studios-Hollywood-globe-entrance-scaled.jpg";
+                                                    }}/>
+                                                
                                                 <div className="w-full flex flex-col justify-between items-start gap-2">
                                                     <div className="flex flex-row justify-between items-center gap-1">
                                                         <BiStar className="size-4 text-yellow-500" />
@@ -120,8 +123,6 @@ const SearchedActivities = ({ categoriesFromApp }) => {
                         )}
                     </div>
                 </div>
-
-                <Footer />
             </div>
         </div>
     );

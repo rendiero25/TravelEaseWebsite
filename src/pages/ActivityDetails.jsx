@@ -189,11 +189,11 @@ const ActivityDetails = () => {
                         </div>
                     </div>
 
-                    <div className="border-b-[0.03rem] border-black/25 w-full"></div>
+                    <div className="border-b-[0.03rem] border-black/7 w-full"></div>
 
-                    <div className="pt-5 xl:pt-7 flex flex-col xl:flex-row justify-between gap-10">
-                        <div className="w-80vw flex flex-col items-start gap-8">
-                            <div className="flex flex-col justify-between items-start gap-4">
+                    <div className="pt-5 xl:pt-7 flex flex-col xl:flex-row justify-between gap-2">
+                        <div className="w-80vw flex flex-col items-start gap-8 w-full">
+                            <div className="flex flex-col justify-between items-start gap-4 w-full">
                                 <div className="w-full xl:h-[20rem] flex flex-col justify-between items-start gap-4">
                                     <img
                                         src={activity.imageUrls[0]}
@@ -235,8 +235,6 @@ const ActivityDetails = () => {
                                         </div>
                                     </div>
 
-                                    <div className="my-3 border-b-[0.03rem] border-black/25 w-full"></div>
-
                                     <div className="hidden w-full xl:flex flex-col xl:flex-row justify-center xl:justify-end items-center gap-1 xl:gap-4">
                                         <div className="flex flex-col justify-center items-end">
                                             <h4 className="text-md font-light text-lg text-gray">Price</h4>
@@ -265,6 +263,8 @@ const ActivityDetails = () => {
                                 </div>
                             </div>
                         </div>
+
+                        <div className="min-h-full border-[0.03rem] border-black/7 self-stretch ml-6 mr-6"></div>
 
                         <div className="w-10vw pb-10 flex flex-col justify-between items-start gap-12">
                             <div className="flex flex-col justify-between items-start gap-4 w-full">
@@ -315,7 +315,7 @@ const ActivityDetails = () => {
                                                         <h4 className="text-md xl:text-sm font-normal text-gray">Mon-Thu, Sun</h4>
                                                         <h4 className="text-md xl:text-sm font-normal text-gray">Noon-Midnight</h4>
                                                     </div>
-                                                    <div className="flex flex-row justify-between items-start">
+                                                   <div className="flex flex-row justify-between items-start">
                                                         <h4 className="text-md xl:text-sm font-normal text-gray">Fri-Sat</h4>
                                                         <h4 className="text-md xl:text-sm font-normal text-gray">Noon-1.00 AM</h4>
                                                     </div>

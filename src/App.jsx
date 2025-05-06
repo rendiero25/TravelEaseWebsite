@@ -45,7 +45,7 @@ const App = () => {
         <AuthProvider>
             <CartProvider>
                 <BrowserRouter>
-
+                    <Header />
                     <Routes>
                         <Route path="/" element={<Index categoriesFromApp={categories} />} />
                         <Route path="/activities" element={<Activities />} />
@@ -63,7 +63,7 @@ const App = () => {
                         <Route path="/cart" element={<Cart />} />
                         <Route path="/checkout" element={<Checkout />} />
                     </Routes>
-
+                    <Footer />
                 </BrowserRouter>
             </CartProvider>
         </AuthProvider>

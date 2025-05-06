@@ -35,7 +35,6 @@ const Index = ({ categoriesFromApp }) => {
 
         <div className="p-0 m-0 box-border font-primary">
             <div className="min-h-screen flex">
-                <Header/>
                 <Hero categoriesFromIndex={categoriesFromApp}/>
             </div>
 
@@ -50,8 +49,6 @@ const Index = ({ categoriesFromApp }) => {
                     <Testimonial />
                 </div>
             </div>
-
-            <Footer />
         </div>
     )
 }

@@ -25,7 +25,8 @@ const Footer = () => {
         <div className={`px-6 pt-20 pb-5 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80 w-full ${isHomePage ? "bg-white" : "bg-blacksecond"} flex flex-col gap-4 xl:gap-14 justify-between items-center`}>
             <div className="flex flex-col xl:flex-row justify-between xl:justify-center items-start xl:items-center gap-8 w-full">
                 <div className="flex flex-col justify-center items-start gap-2">
-                    <img src={Logo} alt="travelease-logo" className="w-50 xl:w-45"/>
+                    <a href="/"><img src={Logo} alt="travelease-logo" className="w-50 xl:w-45"/></a>
+                    
                     <p className="text-md font-light text-gray">A comprehensive travel and activity booking platform that simplifies
                         your journey from planning to experience.
                     </p>

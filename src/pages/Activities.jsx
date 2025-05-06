@@ -94,121 +94,125 @@ const Activities = () => {
     return (
         <div className="m-0 p-0 box-border font-primary">
             <div className="px-6 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80">
-                <div>
-                    <div className="py-10 flex flex-col xl:flex-row justify-between items-center xl:items-start">
-                        <div>
-                            {loading && <div className="text-center py-16">Loading activities...</div>}
-                            {error && !loading && (<div className="text-center py-4 text-red-600">{error}</div>)}
+                <div className="w-full py-10 flex flex-col-reverse xl:flex-row justify-between items-center xl:items-start">
+                    <div className="w-75vw">
+                        {loading && <div className="text-center py-16">Loading activities...</div>}
+                        {error && !loading && (<div className="text-center py-4 text-red-600">{error}</div>)}
 
-                            {!loading && !error && (
-                                <div className="w-full max-w-4xl">
-                                    {activities.length === 0 ? (
-                                        <div className="text-center py-16">No activities found.</div>
-                                    ) : (
-                                        <ul className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                            {activities.map(act => (
-                                                <li 
-                                                    key={act.id} 
-                                                    className="group bg-white rounded-xl p-4 flex flex-col justify-between gap-2 cursor-pointer"
-                                                    onClick={() => goToActivityDetails(act.id)}
-                                                >
-                                                    <div className="flex flex-col xl:flex-row justify-center items-start">
-                                                        <div className="flex flex-col justify-between items-start gap-2 w-full h-full">
-                                                            <img
-                                                                src={act.imageUrls?.[0]}
-                                                                alt={act.title}
-                                                                className="w-full h-48 object-cover mb-3 transition-transform duration-300 ease-in-out group-hover:scale-110"
-                                                                onError={event => {
-                                                                    event.target.onerror = null;
-                                                                    event.target.src = "https://media.universalparksusa.com/wp-content/uploads/2024/02/Universal-Studios-Hollywood-globe-entrance-scaled.jpg";
-                                                                }}
-                                                            />
-                                                            <div className="w-full flex flex-col justify-between items-start gap-2">
-                                                                <div className="flex flex-row justify-between items-center gap-1">
-                                                                    <BiStar className="size-4 text-yellow-500" />
-                                                                    <h4>{act.rating}</h4>
-                                                                    <h4 className="text-md font-light text-black">Stars</h4>
-                                                                </div>
+                        {!loading && !error && (
+                            <div className="w-full max-w-4xl">
+                                {activities.length === 0 ? (
+                                    <div className="text-center py-16">No activities found.</div>
+                                ) : (
+                                    <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 gap-10 xl:gap-4 ">
+                                        {activities.map(act => (
+                                            <li 
+                                                key={act.id} 
+                                                className="bg-red-500 group bg-white rounded-xl flex flex-col justify-between gap-4 cursor-pointer"
+                                                onClick={() => goToActivityDetails(act.id)}>
 
-                                                                <h3 className="font-normal text-3xl">{act.title}</h3>
+                                                <div className="flex flex-wrap justify-center items-start ">
+                                                    <div className="flex flex-col justify-between items-start gap-2 w-full h-full">
+                                                        <img
+                                                            src={act.imageUrls?.[0]}
+                                                            alt={act.title}
+                                                            className="w-full h-75 xl:h-48 object-cover mb-3 transition-transform duration-300 ease-in-out group-hover:scale-110"
+                                                            onError={event => {
+                                                                event.target.onerror = null;
+                                                                event.target.src = "https://media.universalparksusa.com/wp-content/uploads/2024/02/Universal-Studios-Hollywood-globe-entrance-scaled.jpg";
+                                                            }}
+                                                        />
+                                                        <div className="w-full flex flex-col justify-between items-start gap-2">
+                                                            <div className="flex flex-row justify-between items-center gap-1">
+                                                                <BiStar className="size-4 text-yellow-500" />
+                                                                <h4>{act.rating}</h4>
+                                                                <h4 className="text-md font-light text-black">Stars</h4>
+                                                            </div>
 
-                                                                <div className="flex flex-row justify-between items-end w-full">
-                                                                    <div className="flex flex-col justify-between items-start">
-                                                                        <div className="text-md font-light text-black">{act.city}</div>
-                                                                        <div className="text-md xl:text-sm font-light text-gray">{act.province}</div>
-                                                                    </div>
-                                                                    <div className="flex flex-row justify-between items-center gap-1">
-                                                                        <BiCommentDots className="size-4 text-gray" />
-                                                                        <div className="text-md font-light text-black">{act.total_reviews}</div>
-                                                                        <h4 className="text-md font-light text-black">Reviews</h4>
-                                                                    </div>
-                                                                </div>
+                                                            <h3 className="font-normal text-3xl">{act.title}</h3>
 
-                                                                <div className="border-b-[0.03rem] border-black/10 w-full"></div>
-
+                                                            <div className="flex flex-row justify-between items-end w-full">
                                                                 <div className="flex flex-col justify-between items-start">
-                                                                    <div className="flex flex-row justify-between items-center gap-1">
-                                                                        <h4 className="text-md font-light text-gray">Price</h4>
-                                                                        <h4 className="text-md font-medium text-black">{act.price}</h4>
-                                                                    </div>
-
-                                                                    <p className="text-md font-light text-gray overflow-hidden text-ellipsis line-clamp-3">{act.description}</p>
+                                                                    <div className="text-md font-light text-black">{act.city}</div>
+                                                                    <div className="text-md xl:text-sm font-light text-gray">{act.province}</div>
+                                                                </div>
+                                                                <div className="flex flex-row justify-between items-center gap-1">
+                                                                    <BiCommentDots className="size-4 text-gray" />
+                                                                    <div className="text-md font-light text-black">{act.total_reviews}</div>
+                                                                    <h4 className="text-md font-light text-black">Reviews</h4>
                                                                 </div>
                                                             </div>
+
+                                                            <div className="border-b-[0.03rem] border-black/10 w-full"></div>
+
+                                                            <div className="flex flex-col justify-between items-start">
+                                                                <div className="flex flex-row justify-between items-center gap-1">
+                                                                    <h4 className="text-md font-light text-gray">Price</h4>
+                                                                    <h4 className="text-md font-medium text-black">{act.price}</h4>
+                                                                </div>
+
+                                                                <p className="text-md font-light text-gray overflow-hidden text-ellipsis line-clamp-3">{act.description}</p>
+                                                            </div>
                                                         </div>
+
+                                                        <div className="text-gray text-sm font-light mt-2 italic">{act.category?.name}</div>
                                                     </div>
 
-                                                    <div className="text-gray text-sm font-light mt-4 italic">{act.category?.name}</div>
-                                                </li>
+                                                    
+                                                </div>
+
+                                                
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="min-h-full border-[0.03rem] border-black/7 self-stretch ml-6"></div>
+
+                    <div className="w-20vw sticky top-23">
+                        <h3 className="pl-6 text-xl text-black font-normal">Filter Activites</h3>
+
+                        <form onSubmit={handleSearch} className="w-full bg-white p-6 rounded flex flex-col gap-6 mb-10">
+                            <div className="flex-1">
+                                <label className="block text-gray-700 mb-2">Search Title</label>
+                                <input type="text" placeholder={error ? "THIS FIELD IS REQUIRED!" : "Where do you want to go?"}
+                                    className={`w-full border p-2 rounded-md outline-none ${error && !searchTitle && !searchCategory ? "border-red-500" : "border-gray-300"}`}
+                                    value={searchTitle}
+                                    onChange={e => {
+                                        setSearchTitle(e.target.value);
+                                        if (error) setError(null);
+                                    }}
+                                />
+                            </div>
+                            <div className="flex-1">
+                                <label className="block text-gray-700 mb-2">Category</label>
+                                <select
+                                    value={searchCategory}
+                                    onChange={e => {
+                                        setSearchCategory(e.target.value);
+                                        if (error) setError(null);
+                                    }}
+                                    className={`w-full border p-2 rounded-md outline-none text-black/60 ${error && !searchTitle && !searchCategory ? "border-red-500" : "border-gray-300"}`}>
+                                        <option value="">{error ? "THIS FIELD IS REQUIRED!" : "Choose category"}</option>
+                                            {categories.map(cat => (
+                                                <option value={cat.id} key={cat.id}>{cat.name}</option>
                                             ))}
-                                        </ul>
-                                    )}
-                                </div>
-                            )}
-                        </div>
+                                </select>
+                            </div>
+                            <div className="flex gap-2 w-full justify-center">
+                                <Button type="submit" variant="outlined" startIcon={<BiSearchAlt />}
+                                    sx={{color: "#FF948D", fontWeight: 600, textTransform: "none", fontSize: "15px", borderWidth: "2px", borderColor: "#FF948D", borderRadius: "50px", px: 4, py: 1.5,}}>
+                                        Search
+                                </Button>
 
-                        <div className="min-h-full w-2 border-[0.03rem] border-black/25"></div>
-
-                        <div>
-                            <form onSubmit={handleSearch} className="w-full bg-white shadow p-6 rounded flex flex-col gap-6 mb-10">
-                                <div className="flex-1">
-                                    <label className="block text-gray-700 mb-2">Search Title</label>
-                                    <input type="text" placeholder={error ? "THIS FIELD IS REQUIRED!" : "Where do you want to go?"}
-                                        className={`w-full border p-2 rounded-md outline-none ${error && !searchTitle && !searchCategory ? "border-red-500" : "border-gray-300"}`}
-                                        value={searchTitle}
-                                        onChange={e => {
-                                            setSearchTitle(e.target.value);
-                                            if (error) setError(null);
-                                        }}
-                                    />
-                                </div>
-                                <div className="flex-1">
-                                    <label className="block text-gray-700 mb-2">Category</label>
-                                    <select
-                                        value={searchCategory}
-                                        onChange={e => {
-                                            setSearchCategory(e.target.value);
-                                            if (error) setError(null);
-                                        }}
-                                        className={`w-full border p-2 rounded-md outline-none ${error && !searchTitle && !searchCategory ? "border-red-500" : "border-gray-300"}`}>
-                                            <option value="">{error ? "THIS FIELD IS REQUIRED!" : "Choose category"}</option>
-                                                {categories.map(cat => (
-                                                    <option value={cat.id} key={cat.id}>{cat.name}</option>
-                                                ))}
-                                    </select>
-                                </div>
-                                <div className="flex gap-2">
-                                    <Button type="submit" variant="outlined" startIcon={<BiSearchAlt />}
-                                        sx={{color: "#FF948D", fontWeight: 600, textTransform: "none", fontSize: "15px", borderWidth: "2px", borderColor: "#FF948D", borderRadius: "50px", px: 4, py: 1.5,}}>
-                                            Search
-                                    </Button>
-
-                                    <Button type="button" variant="text" onClick={handleReset} sx={{color: "#777", textTransform: "none", fontSize: "15px", px: 2, py: 1.5,}}>
-                                        Reset
-                                    </Button>
-                                </div>
-                            </form>
-                        </div>
+                                <Button type="button" variant="text" onClick={handleReset} sx={{color: "#777", textTransform: "none", fontSize: "15px", px: 2, py: 1.5,}}>
+                                    Reset
+                                </Button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>

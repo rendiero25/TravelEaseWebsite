@@ -75,7 +75,7 @@ const Header = () => {
         <div className={`px-6 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80 py-2 w-full ${isHomePage ? "bg-transparent" : "bg-white"} ${isHomePage ? "absolute" : "relative"} top-0 border-b-[0.03rem] border-white/25 flex justify-between items-center ${isHomePage ? "shadow-none" : "shadow-2xl/10"}`}>
             <div className="w-50vw flex flex-row justify-between items-center gap-18">
                 <div className="">
-                    <img src={isHomePage ? Logo : RedLogo} alt="logo-travelease" className="w-1/2 sm:w-1/3 xl:w-[9rem]"/>
+                    <a href="/"><img src={isHomePage ? Logo : RedLogo} alt="logo-travelease" className="w-1/2 sm:w-1/3 xl:w-[9rem]"/></a>
                 </div>
 
                 <div className="hidden xl:flex w-40vw flex-row justify-between items-center gap-8">
