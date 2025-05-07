@@ -1,16 +1,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import {
-    Box,
-    Typography,
-    Card,
-    CardMedia,
-    CardContent,
-    Grid,
-    CircularProgress,
-    Alert,
-    Pagination,
-} from "@mui/material";
+import Pagination from "@mui/material/Pagination";
+import CircularProgress from "@mui/material/CircularProgress";
+import Alert from "@mui/material/Alert";
+
+import backgroundImage from "../assets/images/hero-bg.png";
 
 const Promotions = () => {
     const [promos, setPromos] = useState([]);
@@ -39,17 +33,17 @@ const Promotions = () => {
 
     if (loading) {
         return (
-            <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+            <div className="flex justify-center mt-20">
                 <CircularProgress />
-            </Box>
+            </div>
         );
     }
 
     if (error) {
         return (
-            <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+            <div className="flex justify-center mt-20">
                 <Alert severity="error">{error}</Alert>
-            </Box>
+            </div>
         );
     }
 
@@ -60,55 +54,51 @@ const Promotions = () => {
     );
 
     return (
-        <Box sx={{ maxWidth: 1200, mx: "auto", mt: 8, px: 2 }}>
-            <Typography variant="h4" sx={{ mb: 4, fontWeight: "bold" }}>
-                Promotions
-            </Typography>
-            <Grid container spacing={3}>
-                {paginatedPromos.map((promo) => (
-                    <Grid item xs={12} sm={6} md={4} key={promo.id}>
-                        <Card>
-                            <CardMedia
-                                component="img"
-                                height="180"
-                                image={
-                                    promo.imageUrl ||
-                                    "https://via.placeholder.com/400x180?text=No+Image"
-                                }
-                                alt={promo.title}
-                            />
-                            <CardContent>
-                                <Typography variant="h6" gutterBottom>
-                                    {promo.title}
-                                </Typography>
-                                <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                    gutterBottom
-                                >
-                                    {promo.description}
-                                </Typography>
-                                <Typography variant="body2" sx={{ mt: 1 }}>
-                                    <strong>Promo Code:</strong> {promo.promo_code}
-                                </Typography>
-                                <Typography variant="body2">
-                                    <strong>Discount Price:</strong>{" "}
-                                    {promo.promo_discount_price}
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                ))}
-            </Grid>
-            <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-                <Pagination
-                    count={Math.ceil(promos.length / rowsPerPage)}
-                    page={page}
-                    onChange={(_, value) => setPage(value)}
-                    color="primary"
-                />
-            </Box>
-        </Box>
+        <div className="m-0 p-0 box-border font-primary">
+            <div className="w-full h-[15rem] flex flex-col justify-center items-center px-6 pt-10" style={{backgroundImage: `url(${backgroundImage})`, objectFit:"fill"}}>
+                <h4 className="text-3xl text-center font-light mb-2 text-white">Browse Promos for Your Getaway</h4>
+                <h4 className="text-lg text-center font-light mb-8 text-white">Whatever your travel plans are, find all the best deals here</h4>
+            </div>
+
+            <div className="px-6 py-20 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80 ">
+                <div className="flex flex-wrap gap-8 justify-center">
+                    {paginatedPromos.map((promo) => (
+                        <div
+                            key={promo.id}
+                            className="flex flex-col bg-white rounded-lg shadow-md w-full max-w-xs min-w-[260px] flex-1">
+                                <img
+                                    src={promo.imageUrl || "https://via.placeholder.com/400x180?text=No+Image"}
+                                    alt={promo.title}
+                                    className="h-44 w-full object-cover rounded-t-lg"
+                                    onError={(e) => {
+                                        e.target.onerror = null; // prevents looping
+                                        e.target.src = "https://media.universalparksusa.com/wp-content/uploads/2024/02/Universal-Studios-Hollywood-globe-entrance-scaled.jpg";
+                                    }}
+                                />
+                                
+                            <div className="p-4 flex flex-col flex-1">
+                                <h3 className="text-lg font-semibold mb-1">{promo.title}</h3>
+                                <p className="text-gray-600 text-sm mb-2">{promo.description}</p>
+                                <div className="mt-auto">
+                                    <div className="text-sm mb-1"><span className="font-bold">Promo Code:</span> {promo.promo_code}</div>
+                                    <div className="text-sm"><span className="font-bold">Discount Price:</span> {promo.promo_discount_price}</div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="flex justify-center pt-20 pb-10">
+                    <Pagination
+                        count={Math.ceil(promos.length / rowsPerPage)}
+                        page={page}
+                        onChange={(_, value) => setPage(value)}
+                        color="primary"
+                    />
+                </div>
+            </div>
+        </div>
+            
     );
 };
 

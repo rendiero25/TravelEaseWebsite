@@ -104,7 +104,7 @@ const Activities = () => {
     return (
         <div className="m-0 p-0 box-border font-primary">
             <div className="px-6 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80">
-                <div className="w-full py-10 flex flex-col-reverse xl:flex-row justify-between items-center xl:items-start">
+                <div className="w-full py-20 flex flex-col-reverse xl:flex-row justify-between items-center xl:items-start">
                     <div className="w-75vw">
                         {loading && (
                             <div className="text-center py-16">
@@ -123,11 +123,11 @@ const Activities = () => {
                                     <div className="text-center py-16">No activities found.</div>
                                 ) : (
                                     <>
-                                        <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 gap-10 xl:gap-4 ">
+                                        <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 xl:gap-4 ">
                                             {paginatedActivities.map(act => (
                                                 <li 
                                                     key={act.id} 
-                                                    className="bg-red-500 group bg-white rounded-xl flex flex-col justify-between gap-4 cursor-pointer"
+                                                    className="group bg-white rounded-xl flex flex-col justify-between gap-4 cursor-pointer"
                                                     onClick={() => goToActivityDetails(act.id)}>
 
                                                     <div className="flex flex-wrap justify-center items-start ">
@@ -184,7 +184,7 @@ const Activities = () => {
                                                 </li>
                                             ))}
                                         </ul>
-                                        <div className="flex justify-center mt-8">
+                                        <div className="flex justify-center pt-20 pb-10">
                                             <Pagination
                                                 count={Math.ceil(activities.length / rowsPerPage)}
                                                 page={page}

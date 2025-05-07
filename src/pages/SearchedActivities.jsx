@@ -130,7 +130,7 @@ const SearchedActivities = ({ categoriesFromApp }) => {
                                         </div>
                                     ))}
                                 </div>
-                                <div className="flex justify-center mt-8">
+                                <div className="flex justify-center pt-20 pb-10">
                                     <Pagination
                                         count={Math.ceil(activities.length / rowsPerPage)}
                                         page={page}
