@@ -3,6 +3,8 @@ import axios from "axios";
 import {BiCommentDots, BiSearchAlt, BiStar} from "react-icons/bi";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
+import Pagination from "@mui/material/Pagination";
+import Skeleton from "@mui/material/Skeleton";
 
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -20,6 +22,8 @@ const Activities = () => {
     const [searchCategory, setSearchCategory] = useState("");
     const [error, setError] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(1);
+    const rowsPerPage = 15;
 
     // Fetch all categories
     useEffect(() => {
@@ -91,12 +95,26 @@ const Activities = () => {
         setActivities(allActivities);
     };
 
+    // Pagination logic
+    const paginatedActivities = activities.slice(
+        (page - 1) * rowsPerPage,
+        page * rowsPerPage
+    );
+
     return (
         <div className="m-0 p-0 box-border font-primary">
             <div className="px-6 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80">
                 <div className="w-full py-10 flex flex-col-reverse xl:flex-row justify-between items-center xl:items-start">
                     <div className="w-75vw">
-                        {loading && <div className="text-center py-16">Loading activities...</div>}
+                        {loading && (
+                            <div className="text-center py-16">
+                                <Skeleton variant="rectangular" width="100%" height={220} sx={{ mb: 2, borderRadius: 2 }} />
+                                <Skeleton variant="text" width="60%" sx={{ mx: "auto", mb: 1 }} />
+                                <Skeleton variant="text" width="40%" sx={{ mx: "auto", mb: 1 }} />
+                                <Skeleton variant="rectangular" width="100%" height={40} sx={{ mb: 2, borderRadius: 2 }} />
+                                <Skeleton variant="rectangular" width="100%" height={220} sx={{ mb: 2, borderRadius: 2 }} />
+                            </div>
+                        )}
                         {error && !loading && (<div className="text-center py-4 text-red-600">{error}</div>)}
 
                         {!loading && !error && (
@@ -104,67 +122,77 @@ const Activities = () => {
                                 {activities.length === 0 ? (
                                     <div className="text-center py-16">No activities found.</div>
                                 ) : (
-                                    <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 gap-10 xl:gap-4 ">
-                                        {activities.map(act => (
-                                            <li 
-                                                key={act.id} 
-                                                className="bg-red-500 group bg-white rounded-xl flex flex-col justify-between gap-4 cursor-pointer"
-                                                onClick={() => goToActivityDetails(act.id)}>
+                                    <>
+                                        <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 gap-10 xl:gap-4 ">
+                                            {paginatedActivities.map(act => (
+                                                <li 
+                                                    key={act.id} 
+                                                    className="bg-red-500 group bg-white rounded-xl flex flex-col justify-between gap-4 cursor-pointer"
+                                                    onClick={() => goToActivityDetails(act.id)}>
 
-                                                <div className="flex flex-wrap justify-center items-start ">
-                                                    <div className="flex flex-col justify-between items-start gap-2 w-full h-full">
-                                                        <img
-                                                            src={act.imageUrls?.[0]}
-                                                            alt={act.title}
-                                                            className="w-full h-75 xl:h-48 object-cover mb-3 transition-transform duration-300 ease-in-out group-hover:scale-110"
-                                                            onError={event => {
-                                                                event.target.onerror = null;
-                                                                event.target.src = "https://media.universalparksusa.com/wp-content/uploads/2024/02/Universal-Studios-Hollywood-globe-entrance-scaled.jpg";
-                                                            }}
-                                                        />
-                                                        <div className="w-full flex flex-col justify-between items-start gap-2">
-                                                            <div className="flex flex-row justify-between items-center gap-1">
-                                                                <BiStar className="size-4 text-yellow-500" />
-                                                                <h4>{act.rating}</h4>
-                                                                <h4 className="text-md font-light text-black">Stars</h4>
-                                                            </div>
+                                                    <div className="flex flex-wrap justify-center items-start ">
+                                                        <div className="flex flex-col justify-between items-start gap-2 w-full h-full">
+                                                            <img
+                                                                src={act.imageUrls?.[0]}
+                                                                alt={act.title}
+                                                                className="w-full h-75 xl:h-48 object-cover mb-3 transition-transform duration-300 ease-in-out group-hover:scale-110"
+                                                                onError={event => {
+                                                                    event.target.onerror = null;
+                                                                    event.target.src = "https://media.universalparksusa.com/wp-content/uploads/2024/02/Universal-Studios-Hollywood-globe-entrance-scaled.jpg";
+                                                                }}
+                                                            />
+                                                            <div className="w-full flex flex-col justify-between items-start gap-2">
+                                                                <div className="flex flex-row justify-between items-center gap-1">
+                                                                    <BiStar className="size-4 text-yellow-500" />
+                                                                    <h4>{act.rating}</h4>
+                                                                    <h4 className="text-md font-light text-black">Stars</h4>
+                                                                </div>
 
-                                                            <h3 className="font-normal text-3xl">{act.title}</h3>
+                                                                <h3 className="font-normal text-3xl">{act.title}</h3>
 
-                                                            <div className="flex flex-row justify-between items-end w-full">
+                                                                <div className="flex flex-row justify-between items-end w-full">
+                                                                    <div className="flex flex-col justify-between items-start">
+                                                                        <div className="text-md font-light text-black">{act.city}</div>
+                                                                        <div className="text-md xl:text-sm font-light text-gray">{act.province}</div>
+                                                                    </div>
+                                                                    <div className="flex flex-row justify-between items-center gap-1">
+                                                                        <BiCommentDots className="size-4 text-gray" />
+                                                                        <div className="text-md font-light text-black">{act.total_reviews}</div>
+                                                                        <h4 className="text-md font-light text-black">Reviews</h4>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div className="border-b-[0.03rem] border-black/10 w-full"></div>
+
                                                                 <div className="flex flex-col justify-between items-start">
-                                                                    <div className="text-md font-light text-black">{act.city}</div>
-                                                                    <div className="text-md xl:text-sm font-light text-gray">{act.province}</div>
-                                                                </div>
-                                                                <div className="flex flex-row justify-between items-center gap-1">
-                                                                    <BiCommentDots className="size-4 text-gray" />
-                                                                    <div className="text-md font-light text-black">{act.total_reviews}</div>
-                                                                    <h4 className="text-md font-light text-black">Reviews</h4>
+                                                                    <div className="flex flex-row justify-between items-center gap-1">
+                                                                        <h4 className="text-md font-light text-gray">Price</h4>
+                                                                        <h4 className="text-md font-medium text-black">{act.price}</h4>
+                                                                    </div>
+
+                                                                    <p className="text-md font-light text-gray overflow-hidden text-ellipsis line-clamp-3">{act.description}</p>
                                                                 </div>
                                                             </div>
 
-                                                            <div className="border-b-[0.03rem] border-black/10 w-full"></div>
-
-                                                            <div className="flex flex-col justify-between items-start">
-                                                                <div className="flex flex-row justify-between items-center gap-1">
-                                                                    <h4 className="text-md font-light text-gray">Price</h4>
-                                                                    <h4 className="text-md font-medium text-black">{act.price}</h4>
-                                                                </div>
-
-                                                                <p className="text-md font-light text-gray overflow-hidden text-ellipsis line-clamp-3">{act.description}</p>
-                                                            </div>
+                                                            <div className="text-gray text-sm font-light mt-2 italic">{act.category?.name}</div>
                                                         </div>
 
-                                                        <div className="text-gray text-sm font-light mt-2 italic">{act.category?.name}</div>
+                                                        
                                                     </div>
 
                                                     
-                                                </div>
-
-                                                
-                                            </li>
-                                        ))}
-                                    </ul>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                        <div className="flex justify-center mt-8">
+                                            <Pagination
+                                                count={Math.ceil(activities.length / rowsPerPage)}
+                                                page={page}
+                                                onChange={(_, value) => setPage(value)}
+                                                color="primary"
+                                            />
+                                        </div>
+                                    </>
                                 )}
                             </div>
                         )}
@@ -196,10 +224,10 @@ const Activities = () => {
                                         if (error) setError(null);
                                     }}
                                     className={`w-full border p-2 rounded-md outline-none text-black/60 ${error && !searchTitle && !searchCategory ? "border-red-500" : "border-gray-300"}`}>
-                                        <option value="">{error ? "THIS FIELD IS REQUIRED!" : "Choose category"}</option>
-                                            {categories.map(cat => (
-                                                <option value={cat.id} key={cat.id}>{cat.name}</option>
-                                            ))}
+                                    <option value="">{error ? "THIS FIELD IS REQUIRED!" : "Choose category"}</option>
+                                        {categories.map(cat => (
+                                            <option value={cat.id} key={cat.id}>{cat.name}</option>
+                                        ))}
                                 </select>
                             </div>
                             <div className="flex gap-2 w-full justify-center">

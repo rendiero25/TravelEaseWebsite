@@ -13,6 +13,7 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { MdPayment, MdShoppingCart, MdReceipt, MdSchedule } from "react-icons/md";
 import { BiChevronDown, BiDownload, BiDetail } from "react-icons/bi";
+import Pagination from '@mui/material/Pagination';
 
 const PurchaseList = () => {
     const { auth } = useAuth();
@@ -20,6 +21,8 @@ const PurchaseList = () => {
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [page, setPage] = useState(1);
+    const rowsPerPage = 15;
 
     useEffect(() => {
         // Check if user is logged in
@@ -100,6 +103,12 @@ const PurchaseList = () => {
         }
     };
 
+    // Pagination logic
+    const paginatedTransactions = transactions.slice(
+        (page - 1) * rowsPerPage,
+        page * rowsPerPage
+    );
+
     return (
         <>
             <Container maxWidth="lg" sx={{ mt: 12, mb: 8 }}>
@@ -131,125 +140,135 @@ const PurchaseList = () => {
                         </Button>
                     </Box>
                 ) : (
-                    <Stack spacing={3}>
-                        {transactions.map((transaction) => (
-                            <Paper
-                                key={transaction.id}
-                                elevation={2}
-                                sx={{ overflow: 'hidden', borderRadius: 2 }}
-                            >
-                                {/* Transaction Header */}
-                                <Box sx={{ p: 3, bgcolor: 'primary.light', color: 'white' }}>
-                                    <Grid container alignItems="center" justifyContent="space-between">
-                                        <Grid item>
-                                            <Typography variant="subtitle2">
-                                                Transaction ID: {transaction.id}
-                                            </Typography>
-                                            <Typography variant="body2">
-                                                {formatDate(transaction.createdAt)}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            {getStatusChip(transaction.status)}
-                                        </Grid>
-                                    </Grid>
-                                </Box>
-
-                                <Divider />
-
-                                {/* Transaction Items */}
-                                <Box sx={{ p: 3 }}>
-                                    {transaction.carts && transaction.carts.map((item) => (
-                                        <Card
-                                            key={item.id}
-                                            sx={{
-                                                mb: 2,
-                                                display: 'flex',
-                                                borderRadius: 2,
-                                                boxShadow: 'none',
-                                                border: '1px solid #eee'
-                                            }}
-                                        >
-                                            <CardMedia
-                                                component="img"
-                                                sx={{ width: 120, height: 120, objectFit: 'cover' }}
-                                                image={item.activity?.imageUrls?.[0] || 'https://via.placeholder.com/120x120?text=No+Image'}
-                                                alt={item.activity?.title || 'Activity Image'}
-                                            />
-                                            <CardContent sx={{ flex: '1 0 auto', p: 2 }}>
-                                                <Typography component="div" variant="h6">
-                                                    {item.activity?.title || 'Activity Name'}
+                    <>
+                        <Stack spacing={3}>
+                            {paginatedTransactions.map((transaction) => (
+                                <Paper
+                                    key={transaction.id}
+                                    elevation={2}
+                                    sx={{ overflow: 'hidden', borderRadius: 2 }}
+                                >
+                                    {/* Transaction Header */}
+                                    <Box sx={{ p: 3, bgcolor: 'primary.light', color: 'white' }}>
+                                        <Grid container alignItems="center" justifyContent="space-between">
+                                            <Grid item>
+                                                <Typography variant="subtitle2">
+                                                    Transaction ID: {transaction.id}
                                                 </Typography>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                                                    <MdSchedule style={{ marginRight: 4 }} />
-                                                    <Typography variant="body2" color="text.secondary">
-                                                        Booking Date: {formatDate(item.bookingDate)}
+                                                <Typography variant="body2">
+                                                    {formatDate(transaction.createdAt)}
+                                                </Typography>
+                                            </Grid>
+                                            <Grid item>
+                                                {getStatusChip(transaction.status)}
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
+
+                                    <Divider />
+
+                                    {/* Transaction Items */}
+                                    <Box sx={{ p: 3 }}>
+                                        {transaction.carts && transaction.carts.map((item) => (
+                                            <Card
+                                                key={item.id}
+                                                sx={{
+                                                    mb: 2,
+                                                    display: 'flex',
+                                                    borderRadius: 2,
+                                                    boxShadow: 'none',
+                                                    border: '1px solid #eee'
+                                                }}
+                                            >
+                                                <CardMedia
+                                                    component="img"
+                                                    sx={{ width: 120, height: 120, objectFit: 'cover' }}
+                                                    image={item.activity?.imageUrls?.[0] || 'https://via.placeholder.com/120x120?text=No+Image'}
+                                                    alt={item.activity?.title || 'Activity Image'}
+                                                />
+                                                <CardContent sx={{ flex: '1 0 auto', p: 2 }}>
+                                                    <Typography component="div" variant="h6">
+                                                        {item.activity?.title || 'Activity Name'}
+                                                    </Typography>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                                                        <MdSchedule style={{ marginRight: 4 }} />
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            Booking Date: {formatDate(item.bookingDate)}
+                                                        </Typography>
+                                                    </Box>
+                                                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                                                        Quantity: {item.quantity || 1}
+                                                    </Typography>
+                                                    <Typography variant="h6" sx={{ mt: 1, color: 'primary.main' }}>
+                                                        {formatCurrency(item.activity?.price || 0)}
+                                                    </Typography>
+                                                </CardContent>
+                                            </Card>
+                                        ))}
+                                    </Box>
+
+                                    <Divider />
+
+                                    {/* Payment Details */}
+                                    <Box sx={{ p: 3, bgcolor: '#f9f9f9' }}>
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={12} md={6}>
+                                                <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                                    <MdPayment style={{ marginRight: 8 }} /> Payment Details
+                                                </Typography>
+                                                <Typography variant="body2">
+                                                    Method: {transaction.paymentMethod?.name || 'N/A'}
+                                                </Typography>
+                                                {transaction.proofImageUrl && (
+                                                    <Typography variant="body2" sx={{ mt: 1 }}>
+                                                        Payment Proof: Available
+                                                    </Typography>
+                                                )}
+                                            </Grid>
+                                            <Grid item xs={12} md={6}>
+                                                <Box sx={{ textAlign: 'right' }}>
+                                                    <Typography variant="body2">Subtotal: {formatCurrency(transaction.totalAmount || 0)}</Typography>
+                                                    <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}>
+                                                        Total: {formatCurrency(transaction.totalAmount || 0)}
                                                     </Typography>
                                                 </Box>
-                                                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                                                    Quantity: {item.quantity || 1}
-                                                </Typography>
-                                                <Typography variant="h6" sx={{ mt: 1, color: 'primary.main' }}>
-                                                    {formatCurrency(item.activity?.price || 0)}
-                                                </Typography>
-                                            </CardContent>
-                                        </Card>
-                                    ))}
-                                </Box>
-
-                                <Divider />
-
-                                {/* Payment Details */}
-                                <Box sx={{ p: 3, bgcolor: '#f9f9f9' }}>
-                                    <Grid container spacing={2}>
-                                        <Grid item xs={12} md={6}>
-                                            <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                                <MdPayment style={{ marginRight: 8 }} /> Payment Details
-                                            </Typography>
-                                            <Typography variant="body2">
-                                                Method: {transaction.paymentMethod?.name || 'N/A'}
-                                            </Typography>
-                                            {transaction.proofImageUrl && (
-                                                <Typography variant="body2" sx={{ mt: 1 }}>
-                                                    Payment Proof: Available
-                                                </Typography>
-                                            )}
+                                            </Grid>
                                         </Grid>
-                                        <Grid item xs={12} md={6}>
-                                            <Box sx={{ textAlign: 'right' }}>
-                                                <Typography variant="body2">Subtotal: {formatCurrency(transaction.totalAmount || 0)}</Typography>
-                                                <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 1 }}>
-                                                    Total: {formatCurrency(transaction.totalAmount || 0)}
-                                                </Typography>
-                                            </Box>
-                                        </Grid>
-                                    </Grid>
-                                </Box>
+                                    </Box>
 
-                                {/* Action Buttons */}
-                                <Box sx={{ p: 2, bgcolor: '#f0f0f0', display: 'flex', justifyContent: 'flex-end' }}>
-                                    <Button
-                                        variant="outlined"
-                                        color="primary"
-                                        startIcon={<BiDetail />}
-                                        onClick={() => navigate(`/transactions-user/${transaction.id}`)}
-                                        sx={{ mr: 2 }}
-                                    >
-                                        View Details
-                                    </Button>
-                                    {transaction.status === 'COMPLETED' && (
+                                    {/* Action Buttons */}
+                                    <Box sx={{ p: 2, bgcolor: '#f0f0f0', display: 'flex', justifyContent: 'flex-end' }}>
                                         <Button
-                                            variant="contained"
+                                            variant="outlined"
                                             color="primary"
-                                            startIcon={<BiDownload />}
+                                            startIcon={<BiDetail />}
+                                            onClick={() => navigate(`/transactions-user/${transaction.id}`)}
+                                            sx={{ mr: 2 }}
                                         >
-                                            Download Invoice
+                                            View Details
                                         </Button>
-                                    )}
-                                </Box>
-                            </Paper>
-                        ))}
-                    </Stack>
+                                        {transaction.status === 'COMPLETED' && (
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                startIcon={<BiDownload />}
+                                            >
+                                                Download Invoice
+                                            </Button>
+                                        )}
+                                    </Box>
+                                </Paper>
+                            ))}
+                        </Stack>
+                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                            <Pagination
+                                count={Math.ceil(transactions.length / rowsPerPage)}
+                                page={page}
+                                onChange={(_, value) => setPage(value)}
+                                color="primary"
+                            />
+                        </Box>
+                    </>
                 )}
             </Container>
 
