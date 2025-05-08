@@ -119,46 +119,6 @@ const Checkout = () => {
         }
     };
 
-
-
-
-    // const handleNext = () => {
-    //     if (activeStep === 1) {
-    //         // Validate first step (order review)
-    //         if (!transactionDetails || !transactionDetails.cartIds || transactionDetails.cartIds.length === 0) {
-    //             setError('No items in cart to checkout');
-    //             return;
-    //         }
-    //     } else if (activeStep === 1) {
-    //         // Validate payment method selection
-    //         if (!selectedPaymentMethod) {
-    //             setError('Please select a payment method');
-    //             return;
-    //         }
-    //         // Create transaction
-    //         createTransaction();
-    //         return; // Don't increment step yet - wait for API response
-    //     } else if (activeStep === 2) {
-    //         // Validate proof image upload
-    //         if (!proofImage && !proofImageUrl) {
-    //             setError('Please upload payment proof');
-    //             return;
-    //         }
-    //         // Upload proof image if not already uploaded
-    //         if (proofImage && !proofImageUrl) {
-    //             uploadProofImage();
-    //             return; // Don't increment step yet - wait for API response
-    //         }
-    //         // If image already uploaded, update transaction with proof
-    //         if (proofImageUrl) {
-    //             updateTransactionWithProof();
-    //             return; // Don't increment step yet - wait for API response
-    //         }
-    //     }
-    //
-    //     setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    // };
-
     const handleBack = () => {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
@@ -177,16 +137,6 @@ const Checkout = () => {
                 return;
             }
 
-
-
-            // // Prepare the API request payload
-            // const paymentData = {
-            //     paymentMethodId: selectedPaymentMethod,
-            //     cartIds: cartIds // Add this line to include the cartIds array
-            // };
-
-            // console.log("Payment data being sent:", paymentData);
-
             // Make the API call to create transaction
             const config = {
                 headers: {
@@ -202,7 +152,6 @@ const Checkout = () => {
 
             console.log("Transaction payload:", payload);
 
-
             const response = await axios.post(
                 'https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/create-transaction',
                 payload,
@@ -211,9 +160,7 @@ const Checkout = () => {
 
             console.log("Transaction created:", response.data);
 
-
             // Store transaction ID for next steps
-            // setTransactionId(response.data.data.id);
             setPaymentSuccess(true);
             setActiveStep(2); // Move to upload proof step
 
@@ -224,100 +171,6 @@ const Checkout = () => {
             setProcessingPayment(false);
         }
     };
-
-    // const createTransaction = async (paymentMethodId) => {
-    //     if (!paymentMethodId) {
-    //         setError('Payment method is required');
-    //         return;
-    //     }
-    //
-    //     try {
-    //         setProcessingPayment(true);
-    //         setError(null);
-    //
-    //         // Your transaction creation code...
-    //         const config = {
-    //             headers: {
-    //                 'apiKey': '24405e01-fbc1-45a5-9f5a-be13afcd757c',
-    //                 'Authorization': `Bearer ${auth.token}`
-    //             }
-    //         };
-    //
-    //         // Make sure all required data is available
-    //         if (!transactionDetails || !transactionDetails.items || transactionDetails.items.length === 0) {
-    //             throw new Error('Transaction details are incomplete');
-    //         }
-    //
-    //         // Extract cart IDs from transaction items
-    //         const cartIds = transactionDetails.items.map(item => item.cartId);
-    //
-    //         if (!cartIds.length) {
-    //             throw new Error('No cart items found');
-    //         }
-    //
-    //
-    //         const response = await axios.post(
-    //             'https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/create-transaction',
-    //             {
-    //                 paymentMethodId: paymentMethodId,
-    //                 // Include other required transaction data here
-    //                 cartIds: cartIds
-    //                 // Make sure any other required fields are included
-    //             },
-    //             config
-    //         );
-    //
-    //         // Handle successful transaction
-    //         console.log("Transaction created successfully:", response.data);
-    //         setTransactionId(response.data.data.id);
-    //         setPaymentSuccess(true);
-    //         setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    //
-    //     } catch (err) {
-    //         console.error("Transaction creation error:", err);
-    //         setError(err.response?.data?.message || 'Failed to create transaction');
-    //     } finally {
-    //         setProcessingPayment(false);
-    //     }
-    // };
-
-    // const createTransaction = async () => {
-    //     try {
-    //         setProcessingPayment(true);
-    //         setError(null);
-    //
-    //         const config = {
-    //             headers: {
-    //                 'apiKey': '24405e01-fbc1-45a5-9f5a-be13afcd757c',
-    //                 'Authorization': `Bearer ${auth.token}`
-    //             }
-    //         };
-    //
-    //         const data = {
-    //             cartIds: transactionDetails.cartIds,
-    //             paymentMethodId: selectedPaymentMethod
-    //         };
-    //
-    //         const response = await axios.post(
-    //             'https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/create-transaction',
-    //             data,
-    //             config
-    //         );
-    //
-    //         if (response.data && response.data.status === 'OK') {
-    //             setTransactionId(response.data.data.id);
-    //             // Move to next step after transaction created
-    //             setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    //         } else {
-    //             throw new Error(response.data?.message || 'Failed to create transaction');
-    //         }
-    //     } catch (err) {
-    //         console.error("Failed to create transaction", err);
-    //         setError(err.response?.data?.message || 'Failed to create transaction. Please try again.');
-    //     } finally {
-    //         setProcessingPayment(false);
-    //     }
-    // };
 
     const uploadProofImage = async () => {
         if (!proofImage) {

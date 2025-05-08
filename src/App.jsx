@@ -23,6 +23,7 @@ import Header from "./components/Header.jsx";
 import Footer from "./components/Footer.jsx";
 import Checkout from "./pages/Checkout.jsx";
 import Promotions from "./pages/Promotions.jsx";
+import TransactionDetails from "./pages/TransactionDetails.jsx";
 
 const App = () => {
 
@@ -64,6 +65,7 @@ const App = () => {
                         <Route path="/cart" element={<Cart />} />
                         <Route path="/checkout" element={<Checkout />} />
                         <Route path="/promotions" element={<Promotions />} />
+                        <Route path="/transactions-details/:id" element={<TransactionDetails />} />
                     </Routes>
                     <Footer />
                 </BrowserRouter>

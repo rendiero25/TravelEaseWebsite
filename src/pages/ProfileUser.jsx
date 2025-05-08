@@ -7,9 +7,6 @@ import { format } from "date-fns";
 import {
     Container,
     Typography,
-    Box,
-    Grid,
-    Paper,
     Avatar,
     Button,
     Divider,
@@ -18,9 +15,7 @@ import {
     Tabs,
     Tab,
     Chip,
-    Alert,
-    IconButton,
-    Stack
+    Alert
 } from "@mui/material";
 
 import {
@@ -37,9 +32,6 @@ import {
 } from "react-icons/md";
 
 import { BiUserCircle, BiCamera, BiHistory } from "react-icons/bi";
-
-import Header from "../components/Header";
-import Footer from "../components/Footer";
 
 const ProfileUser = () => {
     const { auth, updateUserData } = useAuth();
@@ -59,7 +51,6 @@ const ProfileUser = () => {
         address: "",
     });
 
-    // Fetch user data on component mount
     useEffect(() => {
         if (!auth.isLoggedIn) {
             navigate('/login');
@@ -85,11 +76,9 @@ const ProfileUser = () => {
                 config
             );
 
-            console.log("User data:", response.data);
             const user = response.data.data;
             setUserData(user);
 
-            // Initialize form data for editing
             setFormData({
                 name: user.name || "",
                 email: user.email || "",
@@ -100,7 +89,6 @@ const ProfileUser = () => {
 
             setLoading(false);
         } catch (err) {
-            console.error("Failed to fetch user profile", err);
             setError(err.response?.data?.message || 'Failed to load user profile');
             setLoading(false);
         }
@@ -113,7 +101,6 @@ const ProfileUser = () => {
     const handleEditToggle = () => {
         setEditMode(!editMode);
         if (!editMode) {
-            // Reset form data to current user data when entering edit mode
             setFormData({
                 name: userData.name || "",
                 email: userData.email || "",
@@ -144,7 +131,6 @@ const ProfileUser = () => {
                 }
             };
 
-            // Update only the fields that are editable
             const dataToUpdate = {
                 name: formData.name,
                 phoneNumber: formData.phoneNumber,
@@ -157,15 +143,11 @@ const ProfileUser = () => {
                 config
             );
 
-            console.log("Update response:", response.data);
-
-            // Update local data
             setUserData(prev => ({
                 ...prev,
                 ...dataToUpdate
             }));
 
-            // Update auth context if necessary
             updateUserData({
                 ...auth.user,
                 ...dataToUpdate
@@ -174,10 +156,8 @@ const ProfileUser = () => {
             setEditMode(false);
             setLoading(false);
 
-            // Show success message (you might want to add a state for this)
             alert("Profile updated successfully!");
         } catch (err) {
-            console.error("Failed to update profile", err);
             setError(err.response?.data?.message || 'Failed to update profile');
             setLoading(false);
         }
@@ -195,11 +175,9 @@ const ProfileUser = () => {
     if (loading && !userData) {
         return (
             <div>
-                <Header />
                 <Container sx={{ mt: 12, mb: 8, minHeight: "70vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
                     <CircularProgress />
                 </Container>
-                <Footer />
             </div>
         );
     }
@@ -207,7 +185,7 @@ const ProfileUser = () => {
     if (error && !userData) {
         return (
             <div>
-                <Header />
+                
                 <Container sx={{ mt: 12, mb: 8, minHeight: "70vh" }}>
                     <Alert severity="error">{error}</Alert>
                     <Button
@@ -218,109 +196,90 @@ const ProfileUser = () => {
                         Back to Login
                     </Button>
                 </Container>
-                <Footer />
+                
             </div>
         );
     }
 
     return (
-        <div>
-
-            <Container maxWidth="lg" sx={{ mt: 12, mb: 8 }}>
-                <Grid container spacing={4}>
-                    {/* Left side - User Card */}
-                    <Grid item xs={12} md={4}>
-                        <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
-                            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mb: 3 }}>
+        <div className="m-0 p-0 box-border font-primary">
+            <div className="px-6 py-10 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80">
+                <div className="w-full mx-auto mb-8">
+                        <div className="flex flex-col lg:flex-row gap-8">
+                            <div className="w-full lg:w-1/3 bg-white rounded-2xl shadow p-6 flex flex-col items-center">
                                 <Avatar
                                     src={userData?.profilePictureUrl}
                                     alt={userData?.name}
                                     sx={{ width: 150, height: 150, mb: 2 }}
                                 />
-
                                 <Typography variant="h5" gutterBottom>
                                     {userData?.name}
                                 </Typography>
-
                                 <Chip
                                     label={userData?.role?.name || "User"}
                                     color="primary"
                                     size="small"
                                     sx={{ mb: 1 }}
                                 />
-
                                 <Typography variant="body2" color="text.secondary" align="center">
                                     Member since {formatDate(userData?.createdAt)}
                                 </Typography>
-                            </Box>
-
-                            <Divider sx={{ my: 2 }} />
-
-                            <Box>
-                                <Button
-                                    variant="contained"
-                                    fullWidth
-                                    startIcon={<MdShoppingCart />}
-                                    onClick={() => navigate('/purchase-list')}
-                                    sx={{ mb: 2 }}
-                                >
-                                    My Orders
-                                </Button>
-
-                                <Button
-                                    variant="outlined"
-                                    fullWidth
-                                    startIcon={<MdLock />}
-                                    onClick={() => navigate('/change-password')}
-                                >
-                                    Change Password
-                                </Button>
-                            </Box>
-                        </Paper>
-                    </Grid>
-
-                    {/* Right side - User Information and Tabs */}
-                    <Grid item xs={12} md={8}>
-                        <Paper elevation={3} sx={{ borderRadius: 2 }}>
-                            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                                <Tabs
-                                    value={tabValue}
-                                    onChange={handleTabChange}
-                                    aria-label="user profile tabs"
-                                >
-                                    <Tab
-                                        icon={<BiUserCircle />}
-                                        iconPosition="start"
-                                        label="Profile Information"
-                                    />
-                                    <Tab
-                                        icon={<BiHistory />}
-                                        iconPosition="start"
-                                        label="Account Activity"
-                                    />
-                                </Tabs>
-                            </Box>
-
-                            {/* Profile Information Tab */}
-                            {tabValue === 0 && (
-                                <Box sx={{ p: 3 }}>
-                                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-                                        <Typography variant="h6">Personal Information</Typography>
-
-                                        <Button
-                                            variant="outlined"
-                                            startIcon={editMode ? <MdClose /> : <MdEdit />}
-                                            onClick={handleEditToggle}
-                                            color={editMode ? "error" : "primary"}
-                                        >
-                                            {editMode ? "Cancel" : "Edit Profile"}
-                                        </Button>
-                                    </Box>
-
-                                    {editMode ? (
-                                        <form onSubmit={handleSubmit}>
-                                            <Grid container spacing={3}>
-                                                <Grid item xs={12}>
+                                <div className="my-4 w-full border-b border-gray-200"></div>
+                                <div className="w-full flex flex-col gap-2">
+                                    <Button
+                                        variant="contained"
+                                        fullWidth
+                                        startIcon={<MdShoppingCart />}
+                                        onClick={() => navigate('/purchase-list')}
+                                        sx={{ mb: 2 }}
+                                    >
+                                        My Orders
+                                    </Button>
+                                    <Button
+                                        variant="outlined"
+                                        fullWidth
+                                        startIcon={<MdLock />}
+                                        onClick={() => navigate('/change-password')}
+                                    >
+                                        Change Password
+                                    </Button>
+                                </div>
+                            </div>
+                            <div className="w-full lg:w-2/3 bg-white rounded-2xl shadow p-6">
+                                <div className="border-b border-gray-200 mb-4">
+                                    <Tabs
+                                        value={tabValue}
+                                        onChange={handleTabChange}
+                                        aria-label="user profile tabs"
+                                    >
+                                        <Tab
+                                            icon={<BiUserCircle />}
+                                            iconPosition="start"
+                                            label="Profile Information"
+                                        />
+                                        <Tab
+                                            icon={<BiHistory />}
+                                            iconPosition="start"
+                                            label="Account Activity"
+                                        />
+                                    </Tabs>
+                                </div>
+                                {tabValue === 0 && (
+                                    <div>
+                                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+                                            <Typography variant="h6">Personal Information</Typography>
+                                            <Button
+                                                variant="outlined"
+                                                startIcon={editMode ? <MdClose /> : <MdEdit />}
+                                                onClick={handleEditToggle}
+                                                color={editMode ? "error" : "primary"}
+                                            >
+                                                {editMode ? "Cancel" : "Edit Profile"}
+                                            </Button>
+                                        </div>
+                                        {editMode ? (
+                                            <form onSubmit={handleSubmit}>
+                                                <div className="flex flex-col gap-4">
                                                     <TextField
                                                         fullWidth
                                                         label="Full Name"
@@ -331,9 +290,6 @@ const ProfileUser = () => {
                                                             startAdornment: <MdPerson style={{ marginRight: 8 }} />,
                                                         }}
                                                     />
-                                                </Grid>
-
-                                                <Grid item xs={12}>
                                                     <TextField
                                                         fullWidth
                                                         label="Email"
@@ -345,9 +301,6 @@ const ProfileUser = () => {
                                                         }}
                                                         helperText="Email cannot be changed"
                                                     />
-                                                </Grid>
-
-                                                <Grid item xs={12}>
                                                     <TextField
                                                         fullWidth
                                                         label="Phone Number"
@@ -358,9 +311,6 @@ const ProfileUser = () => {
                                                             startAdornment: <MdPhone style={{ marginRight: 8 }} />,
                                                         }}
                                                     />
-                                                </Grid>
-
-                                                <Grid item xs={12}>
                                                     <TextField
                                                         fullWidth
                                                         label="Address"
@@ -373,9 +323,6 @@ const ProfileUser = () => {
                                                             startAdornment: <MdLocationOn style={{ marginRight: 8, alignSelf: 'flex-start', marginTop: 8 }} />,
                                                         }}
                                                     />
-                                                </Grid>
-
-                                                <Grid item xs={12}>
                                                     <Button
                                                         type="submit"
                                                         variant="contained"
@@ -385,117 +332,97 @@ const ProfileUser = () => {
                                                     >
                                                         {loading ? "Saving..." : "Save Changes"}
                                                     </Button>
-                                                </Grid>
-                                            </Grid>
-                                        </form>
-                                    ) : (
-                                        <Stack spacing={3}>
-                                            <Box>
-                                                <Typography variant="subtitle2" color="text.secondary">
-                                                    <MdPerson style={{ verticalAlign: 'middle', marginRight: 8 }} />
-                                                    Full Name
-                                                </Typography>
-                                                <Typography variant="body1">
-                                                    {userData?.name || "Not provided"}
-                                                </Typography>
-                                            </Box>
-
-                                            <Box>
-                                                <Typography variant="subtitle2" color="text.secondary">
-                                                    <MdEmail style={{ verticalAlign: 'middle', marginRight: 8 }} />
-                                                    Email Address
-                                                </Typography>
-                                                <Typography variant="body1">
-                                                    {userData?.email || "Not provided"}
-                                                </Typography>
-                                            </Box>
-
-                                            <Box>
-                                                <Typography variant="subtitle2" color="text.secondary">
-                                                    <MdPhone style={{ verticalAlign: 'middle', marginRight: 8 }} />
-                                                    Phone Number
-                                                </Typography>
-                                                <Typography variant="body1">
-                                                    {userData?.phoneNumber || "Not provided"}
-                                                </Typography>
-                                            </Box>
-
-                                            <Box>
-                                                <Typography variant="subtitle2" color="text.secondary">
-                                                    <MdLocationOn style={{ verticalAlign: 'middle', marginRight: 8 }} />
-                                                    Address
-                                                </Typography>
-                                                <Typography variant="body1">
-                                                    {userData?.address || "Not provided"}
-                                                </Typography>
-                                            </Box>
-
-                                            <Box>
-                                                <Typography variant="subtitle2" color="text.secondary">
-                                                    <MdCalendarToday style={{ verticalAlign: 'middle', marginRight: 8 }} />
-                                                    Account Created
-                                                </Typography>
-                                                <Typography variant="body1">
-                                                    {formatDate(userData?.createdAt)}
-                                                </Typography>
-                                            </Box>
-
-                                            <Box>
-                                                <Typography variant="subtitle2" color="text.secondary">
-                                                    <MdCalendarToday style={{ verticalAlign: 'middle', marginRight: 8 }} />
-                                                    Last Updated
-                                                </Typography>
-                                                <Typography variant="body1">
-                                                    {formatDate(userData?.updatedAt)}
-                                                </Typography>
-                                            </Box>
-                                        </Stack>
-                                    )}
-                                </Box>
-                            )}
-
-                            {/* Account Activity Tab */}
-                            {tabValue === 1 && (
-                                <Box sx={{ p: 3 }}>
-                                    <Typography variant="h6" gutterBottom>Account Activity</Typography>
-
-                                    <Box sx={{ mt: 2 }}>
-                                        <Grid container spacing={2}>
-                                            <Grid item xs={12}>
-                                                <Paper elevation={1} sx={{ p: 2, borderRadius: 1 }}>
-                                                    <Typography variant="subtitle2">Last Login</Typography>
-                                                    <Typography variant="body2" color="text.secondary">
-                                                        {formatDate(new Date())}
+                                                </div>
+                                            </form>
+                                        ) : (
+                                            <div className="flex flex-col gap-4">
+                                                <div>
+                                                    <Typography variant="subtitle2" color="text.secondary">
+                                                        <MdPerson style={{ verticalAlign: 'middle', marginRight: 8 }} />
+                                                        Full Name
                                                     </Typography>
-                                                </Paper>
-                                            </Grid>
-
-                                            <Grid item xs={12}>
-                                                <Paper elevation={1} sx={{ p: 2, borderRadius: 1 }}>
-                                                    <Typography variant="subtitle2">Profile Created</Typography>
-                                                    <Typography variant="body2" color="text.secondary">
+                                                    <Typography variant="body1">
+                                                        {userData?.name || "Not provided"}
+                                                    </Typography>
+                                                </div>
+                                                <div>
+                                                    <Typography variant="subtitle2" color="text.secondary">
+                                                        <MdEmail style={{ verticalAlign: 'middle', marginRight: 8 }} />
+                                                        Email Address
+                                                    </Typography>
+                                                    <Typography variant="body1">
+                                                        {userData?.email || "Not provided"}
+                                                    </Typography>
+                                                </div>
+                                                <div>
+                                                    <Typography variant="subtitle2" color="text.secondary">
+                                                        <MdPhone style={{ verticalAlign: 'middle', marginRight: 8 }} />
+                                                        Phone Number
+                                                    </Typography>
+                                                    <Typography variant="body1">
+                                                        {userData?.phoneNumber || "Not provided"}
+                                                    </Typography>
+                                                </div>
+                                                <div>
+                                                    <Typography variant="subtitle2" color="text.secondary">
+                                                        <MdLocationOn style={{ verticalAlign: 'middle', marginRight: 8 }} />
+                                                        Address
+                                                    </Typography>
+                                                    <Typography variant="body1">
+                                                        {userData?.address || "Not provided"}
+                                                    </Typography>
+                                                </div>
+                                                <div>
+                                                    <Typography variant="subtitle2" color="text.secondary">
+                                                        <MdCalendarToday style={{ verticalAlign: 'middle', marginRight: 8 }} />
+                                                        Account Created
+                                                    </Typography>
+                                                    <Typography variant="body1">
                                                         {formatDate(userData?.createdAt)}
                                                     </Typography>
-                                                </Paper>
-                                            </Grid>
-
-                                            <Grid item xs={12}>
-                                                <Paper elevation={1} sx={{ p: 2, borderRadius: 1 }}>
-                                                    <Typography variant="subtitle2">Last Profile Update</Typography>
-                                                    <Typography variant="body2" color="text.secondary">
+                                                </div>
+                                                <div>
+                                                    <Typography variant="subtitle2" color="text.secondary">
+                                                        <MdCalendarToday style={{ verticalAlign: 'middle', marginRight: 8 }} />
+                                                        Last Updated
+                                                    </Typography>
+                                                    <Typography variant="body1">
                                                         {formatDate(userData?.updatedAt)}
                                                     </Typography>
-                                                </Paper>
-                                            </Grid>
-                                        </Grid>
-                                    </Box>
-                                </Box>
-                            )}
-                        </Paper>
-                    </Grid>
-                </Grid>
-            </Container>
-
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                                {tabValue === 1 && (
+                                    <div>
+                                        <Typography variant="h6" gutterBottom>Account Activity</Typography>
+                                        <div className="flex flex-col gap-4 mt-2">
+                                            <div className="bg-gray-50 rounded-lg p-4">
+                                                <Typography variant="subtitle2">Last Login</Typography>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    {formatDate(new Date())}
+                                                </Typography>
+                                            </div>
+                                            <div className="bg-gray-50 rounded-lg p-4">
+                                                <Typography variant="subtitle2">Profile Created</Typography>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    {formatDate(userData?.createdAt)}
+                                                </Typography>
+                                            </div>
+                                            <div className="bg-gray-50 rounded-lg p-4">
+                                                <Typography variant="subtitle2">Last Profile Update</Typography>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    {formatDate(userData?.updatedAt)}
+                                                </Typography>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
         </div>
     );
 };
