@@ -56,12 +56,12 @@ const Promotions = () => {
     return (
         <div className="m-0 p-0 box-border font-primary">
             <div className="w-full h-[15rem] flex flex-col justify-center items-center px-6 pt-10" style={{backgroundImage: `url(${backgroundImage})`, objectFit:"fill"}}>
-                <h4 className="text-3xl text-center font-light mb-2 text-white">Browse Promos for Your Getaway</h4>
+                <h4 className="text-4xl text-center font-medium mb-2 text-white">Browse Promos for Your Getaway</h4>
                 <h4 className="text-lg text-center font-light mb-8 text-white">Whatever your travel plans are, find all the best deals here</h4>
             </div>
 
             <div className="px-6 py-20 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80 ">
-                <div className="flex flex-wrap gap-8 justify-center">
+                <div className="flex flex-wrap gap-8 justify-center xl:justify-start">
                     {paginatedPromos.map((promo) => (
                         <div
                             key={promo.id}

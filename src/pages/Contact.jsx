@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { Box, Button, TextField, Typography, Paper, Alert } from "@mui/material";
+import { Button, TextField, Alert } from "@mui/material";
+
+import BannerForRegisterBg from "../assets/images/bannerforregister-bg.jpg";
 
 const CONTACT_EMAIL = "workspace.rendy@gmail.com";
 const CONTACT_WA = "+62 812 9879 0058";
@@ -49,100 +51,100 @@ const Contact = () => {
     };
 
     return (
-        <Box sx={{ minHeight: "100vh", bgcolor: "#fafbfc", py: 6 }}>
-            <Box sx={{ maxWidth: 700, mx: "auto", mb: 6, p: 2 }}>
-                <Typography variant="h4" fontWeight={600} gutterBottom>
-                    Hello {userName}, How can we help you?
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                    Reach out to our customer service or check our contact info below.
-                </Typography>
-            </Box>
+        <div className="m-0 p-0 box-border font-primary">
+            <div className="bg-gray/5 px-6 py-10 xl:py-20 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80 flex flex-col gap-20 xl:gap-25">
+                <div className="flex flex-col gap-20 xl:gap-25">
+                    <div className="w-full mx-auto">
+                        <h2 className="font-medium text-4xl mb-4 text-center">
+                            Hello {userName}, How can we help you?
+                        </h2>
+                        <p className="text-gray text-light text-center text-lg">
+                            Reach out to our customer service or check our contact info below.
+                        </p>
+                    </div>
 
-            <Box sx={{ maxWidth: 700, mx: "auto", mb: 6 }}>
-                <Paper sx={{ p: 4 }}>
-                    <Typography variant="h6" gutterBottom>
-                        Get in touch with Customer Service
-                    </Typography>
-                    <form onSubmit={handleFormSubmit}>
-                        <TextField
-                            label="Your Email"
-                            name="email"
-                            type="email"
-                            value={form.email}
-                            onChange={handleFormChange}
-                            fullWidth
-                            sx={{ mb: 2 }}
-                        />
-                        <TextField
-                            label="Description"
-                            name="description"
-                            value={form.description}
-                            onChange={handleFormChange}
-                            fullWidth
-                            multiline
-                            minRows={3}
-                            sx={{ mb: 2 }}
-                        />
-                        <Button type="submit" variant="contained" color="primary">
-                            Submit
-                        </Button>
-                    </form>
-                    {formStatus.error && <Alert severity="error" sx={{ mt: 2 }}>{formStatus.error}</Alert>}
-                    {formStatus.success && <Alert severity="success" sx={{ mt: 2 }}>{formStatus.success}</Alert>}
-                </Paper>
-            </Box>
+                    <div className="flex flex-col xl:flex-row gap-8 justify-between items-center w-full">
+                        <div className="w-75vw mx-auto border-[0.03rem] border-primary/7">
+                            <div className="bg-white rounded-lg p-6">
+                                <h3 className="font-medium text-3xl mb-4 text-center">
+                                    Get in touch with Customer Service
+                                </h3>
+                                <form onSubmit={handleFormSubmit} className="flex flex-col gap-6">
+                                    <TextField
+                                        label="Your Email"
+                                        name="email"
+                                        type="email"
+                                        value={form.email}
+                                        onChange={handleFormChange}
+                                        fullWidth
+                                    />
+                                    <TextField
+                                        label="Description"
+                                        name="description"
+                                        value={form.description}
+                                        onChange={handleFormChange}
+                                        fullWidth
+                                        multiline
+                                        minRows={3}
+                                    />
+                                    <Button type="submit" variant="outlined" sx={{color:"#FF948D", fontWeight:"400", textTransform:"none", fontSize:"14px", borderWidth:"2px", borderColor:"#FF948D", borderRadius:"50px", padding:"8px 46px"}}>
+                                        Submit
+                                    </Button>
+                                </form>
+                                {formStatus.error && <Alert severity="error" sx={{ mt: 2 }}>{formStatus.error}</Alert>}
+                                {formStatus.success && <Alert severity="success" sx={{ mt: 2 }}>{formStatus.success}</Alert>}
+                            </div>
+                        </div>
 
-            <Box sx={{ maxWidth: 700, mx: "auto", mb: 6 }}>
-                <Paper sx={{ p: 4, display: "flex", flexDirection: "column", gap: 1 }}>
-                    <Typography variant="h6" gutterBottom>Contact Information</Typography>
-                    <Typography variant="body1">
-                        Email: <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
-                    </Typography>
-                    <Typography variant="body1">
-                        WhatsApp: <a href={`https://wa.me/${CONTACT_WA.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer">{CONTACT_WA}</a>
-                    </Typography>
-                </Paper>
-            </Box>
+                        <div className="w-25vw mx-auto mb-6 border-[0.03rem] border-primary/7">
+                            <div className="bg-white rounded-lg p-8 flex flex-col gap-1">
+                                <h3 className="font-medium text-3xl mb-4">Contact Information</h3>
+                                <p className="text-base">
+                                    Email: <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+                                </p>
+                                <p className="text-base">
+                                    WhatsApp: <a href={`https://wa.me/${CONTACT_WA.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer">{CONTACT_WA}</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            <Box sx={{ maxWidth: 700, mx: "auto", mb: 6 }}>
-                <Paper sx={{ p: 2 }}>
-                    <Typography variant="h6" gutterBottom>Our Location</Typography>
-                    <Box sx={{ width: "100%", height: 350, mt: 2 }}>
+            <div className="w-full mx-auto bg-gray/5">
+                <div className="">
+                    <h3 className="font-medium text-3xl mb-9 px-6 text-center">Our Location</h3>
+                    <div className="w-full h-[350px] mt-4">
                         <iframe
                             src={MAPS_EMBED_URL}
                             width="100%"
                             height="100%"
-                            style={{ border: 0 }}
+                            className="border-0 w-full h-full"
                             allowFullScreen=""
                             loading="lazy"
                             referrerPolicy="no-referrer-when-downgrade"
                             title="Bekasi Location"
                         ></iframe>
-                    </Box>
-                </Paper>
-            </Box>
+                    </div>
+                </div>
+            </div>
 
-            <Box sx={{ maxWidth: 700, mx: "auto", mb: 6 }}>
-                <Paper sx={{
-                    p: 4,
-                    display: "flex",
-                    flexDirection: { xs: "column", sm: "row" },
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    bgcolor: "#f8616c",
-                    color: "white",
-                    borderRadius: 2
-                }}>
-                    <Box sx={{ mb: { xs: 2, sm: 0 } }}>
-                        <Typography variant="h6" fontWeight={600}>
+            <div className="relative w-full mx-auto flex justify-center items-center">
+                <div className="w-full">
+                    <img src={BannerForRegisterBg} alt="contact-banner" className="w-full h-[15rem] object-cover"/>
+                </div>
+
+                <div className="absolute w-full text-white px-6 py-10 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80 flex flex-col xl:flex-row gap-4 justify-center items-center">
+                    <div className="w-full">
+                        <h3 className="font-medium text-3xl mb-1">
                             Subscribe for Updates & Promotions
-                        </Typography>
-                        <Typography variant="body2">
+                        </h3>
+                        <p className="text-light text-lg">
                             Get the latest news and exclusive offers from TravelEase.
-                        </Typography>
-                    </Box>
-                    <form onSubmit={handleSubscribe} style={{ display: "flex", gap: 8 }}>
+                        </p>
+                    </div>
+
+                    <form onSubmit={handleSubscribe} className="flex gap-4 w-full justify-center items-center">
                         <TextField
                             variant="outlined"
                             size="small"
@@ -152,20 +154,20 @@ const Contact = () => {
                             sx={{
                                 bgcolor: "white",
                                 borderRadius: 1,
-                                mr: 1,
-                                minWidth: 220
+                                minWidth: 250
                             }}
                             inputProps={{ style: { color: "#1e1e1e" } }}
                         />
-                        <Button type="submit" variant="contained" sx={{ bgcolor: "#fff", color: "#f8616c", fontWeight: 600 }}>
+                        <Button type="submit" variant="outlined" sx={{color:"white", fontWeight:"400", textTransform:"none", fontSize:"14px", borderColor: "white", borderRadius:"50px", padding:"12px 50px"}}>
                             Subscribe
                         </Button>
                     </form>
-                </Paper>
-                {subscribeStatus.error && <Alert severity="error" sx={{ mt: 2 }}>{subscribeStatus.error}</Alert>}
-                {subscribeStatus.success && <Alert severity="success" sx={{ mt: 2 }}>{subscribeStatus.success}</Alert>}
-            </Box>
-        </Box>
+
+                    {subscribeStatus.error && <Alert severity="error" sx={{ mt: 2 }}>{subscribeStatus.error}</Alert>}
+                    {subscribeStatus.success && <Alert severity="success" sx={{ mt: 2 }}>{subscribeStatus.success}</Alert>}
+                </div>
+            </div>
+        </div>
     );
 };
 

@@ -33,7 +33,7 @@ const TopActivities = () => {
                 };
 
                 const response = await axios.get("https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/activities", config);
-                const dataFromApi = response.data.data.slice(0, 10);
+                const dataFromApi = response.data.data.slice(0, 6);
 
                 setActivities(dataFromApi);
                 setLoading(false);

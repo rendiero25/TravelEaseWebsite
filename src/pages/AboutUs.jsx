@@ -17,7 +17,7 @@ const AboutUs = () => {
                         className="w-full h-full object-cover rounded-none"
                     />
                     <div className="absolute top-0 left-0 w-full h-full bg-black/35 flex items-center justify-center">
-                        <h1 className="text-white font-light text-3xl md:text-4xl text-center drop-shadow-lg px-6">
+                        <h1 className="text-white font-medium text-3xl md:text-4xl text-center drop-shadow-lg px-6">
                             Discover the World with Travelease
                         </h1>
                     </div>
@@ -34,10 +34,10 @@ const AboutUs = () => {
                     </div>
                     <div className="w-full md:w-1/2">
                         <h2 className="font-bold text-3xl mb-5 text-center xl:text-left">Apa itu Travelease?</h2>
-                        <p className="text-gray-600 mb-2 text-center xl:text-left xl:text-xl">
+                        <p className="text-gray mb-2 text-center xl:text-left xl:text-xl">
                             Travelease adalah platform pemesanan perjalanan dan aktivitas yang memudahkan pengguna untuk menemukan, merencanakan, dan memesan pengalaman terbaik di berbagai destinasi. Kami hadir untuk menyederhanakan perjalanan Anda, mulai dari inspirasi hingga pengalaman nyata di lapangan.
                         </p>
-                        <p className="text-gray-500 text-sm text-center xl:text-left xl:text-lg">
+                        <p className="text-gray text-sm text-center xl:text-left xl:text-lg">
                             Dengan jaringan mitra lokal dan teknologi terkini, Travelease memastikan setiap perjalanan menjadi lebih mudah, aman, dan berkesan.
                         </p>
                     </div>
@@ -49,27 +49,27 @@ const AboutUs = () => {
                         <div className="flex-1 min-w-[220px] bg-white rounded-lg border-[0.03rem] border-black/7 p-10 text-center flex flex-col items-center">
                             <MdTravelExplore size={40} color="#F8616C" />
                             <h3 className="font-bold text-xl mt-2">120+</h3>
-                            <p className="text-gray-500 font-light xl:text-lg">Activities</p>
+                            <p className="text-gray font-light xl:text-lg">Activities</p>
                         </div>
                         <div className="flex-1 min-w-[220px] bg-white rounded-lg border-[0.03rem] border-black/7 p-10 text-center flex flex-col items-center">
                             <FaExchangeAlt size={40} color="#F8616C" />
                             <h3 className="font-bold text-xl mt-2">8,500+</h3>
-                            <p className="text-gray-500 font-light xl:text-lg">Transactions</p>
+                            <p className="text-gray font-light xl:text-lg">Transactions</p>
                         </div>
                         <div className="flex-1 min-w-[220px] bg-white rounded-lg border-[0.03rem] border-black/7 p-10 text-center flex flex-col items-center">
                             <FaUsers size={40} color="#F8616C" />
                             <h3 className="font-bold text-xl mt-2">3,200+</h3>
-                            <p className="text-gray-500 font-light xl:text-lg">Users</p>
+                            <p className="text-gray font-light xl:text-lg">Users</p>
                         </div>
                         <div className="flex-1 min-w-[220px] bg-white rounded-lg border-[0.03rem] border-black/7 p-10 text-center flex flex-col items-center">
                             <FaGlobeAsia size={40} color="#F8616C" />
                             <h3 className="font-bold text-xl mt-2">15+</h3>
-                            <p className="text-gray-500 font-light xl:text-lg">Destinations</p>
+                            <p className="text-gray font-light xl:text-lg">Destinations</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="max-w-[1100px] mx-auto flex flex-col gap-5">
+                <div className="w-full mx-auto flex flex-col gap-5">
                     <h2 className="text-center font-bold text-3xl mb-4">Empowering the Travel Ecosystem</h2>
                     <div className="flex flex-col md:flex-row items-center gap-8 xl:gap-12">
                         <div className="w-full md:w-1/2">
@@ -84,7 +84,7 @@ const AboutUs = () => {
                                 <MdGroups size={50} color="#F8616C" />
                                 <div>
                                     <h4 className="font-bold text-lg text-center xl:text-start">Enabling Customers</h4>
-                                    <p className="text-gray-500 text-sm xl:text-lg text-center xl:text-start">
+                                    <p className="text-gray text-sm xl:text-lg text-center xl:text-start">
                                         Memberikan kemudahan akses, transparansi harga, dan pengalaman pemesanan yang seamless bagi pelanggan.
                                     </p>
                                 </div>
@@ -93,7 +93,7 @@ const AboutUs = () => {
                                 <MdTrendingUp size={50} color="#F8616C" />
                                 <div>
                                     <h4 className="font-bold text-lg text-center xl:text-start">Empowering Communities</h4>
-                                    <p className="text-gray-500 text-sm xl:text-lg text-center xl:text-start">
+                                    <p className="text-gray text-sm xl:text-lg text-center xl:text-start">
                                         Mendukung pelaku usaha lokal dan komunitas pariwisata untuk berkembang melalui kolaborasi dan teknologi.
                                     </p>
                                 </div>
@@ -102,7 +102,7 @@ const AboutUs = () => {
                                 <MdTravelExplore size={50} color="#F8616C" />
                                 <div>
                                     <h4 className="font-bold text-lg text-center xl:text-start">Sustainable Tourism</h4>
-                                    <p className="text-gray-500 text-sm xl:text-lg text-center xl:text-start">
+                                    <p className="text-gray text-sm xl:text-lg text-center xl:text-start">
                                         Berkomitmen pada pariwisata berkelanjutan yang berdampak positif bagi lingkungan dan masyarakat.
                                     </p>
                                 </div>

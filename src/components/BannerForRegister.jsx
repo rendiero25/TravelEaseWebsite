@@ -20,7 +20,7 @@ const BannerForRegister = () => {
                     <p className="text-lg font-light text-white xl:max-w-2xl">Become part of our vibrant travel family where adventures are shared, connections are made, and unforgettable experiences await at every destination.</p>
                 </div>
 
-                <Button onClick={toRegister} variant="outlined" startIcon={<BiHappy/>} style={{color:"white", fontWeight:"400", textTransform:"none", fontSize:"14px", borderColor: "white", borderRadius:"50px", padding:"12px 50px"}}>Register Now</Button>
+                <Button onClick={toRegister} variant="outlined" startIcon={<BiHappy/>} sx={{color:"white", fontWeight:"400", textTransform:"none", fontSize:"14px", borderColor: "white", borderRadius:"50px", padding:"12px 50px"}}>Register Now</Button>
             </div>
         </div>
     )

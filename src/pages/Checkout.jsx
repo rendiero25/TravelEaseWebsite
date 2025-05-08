@@ -14,9 +14,6 @@ import {
 import { BiReceipt, BiCreditCard, BiCheckCircle, BiArrowBack, BiUpload } from "react-icons/bi";
 import { MdPayment, MdShoppingCart, MdLocationOn } from "react-icons/md";
 
-import Header from "../components/Header.jsx";
-import Footer from "../components/Footer.jsx";
-
 const Checkout = () => {
     const navigate = useNavigate();
     const { auth } = useAuth();
@@ -689,7 +686,6 @@ const Checkout = () => {
 
     return (
         <>
-            <Header />
             <Container maxWidth="md" sx={{ mt: 8, mb: 6 }}>
                 <Paper sx={{ p: 3, borderRadius: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
@@ -762,7 +758,7 @@ const Checkout = () => {
                     )}
                 </Paper>
             </Container>
-            <Footer />
+            
         </>
     );
 };

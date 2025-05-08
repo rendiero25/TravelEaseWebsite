@@ -8,7 +8,6 @@ import {
     Container,
     Typography,
     Box,
-    Grid,
     Paper,
     Avatar,
     Button,
@@ -178,274 +177,276 @@ const ProfileAdmin = () => {
 
     if (loading && !adminData) {
         return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+            <div className="flex justify-center items-center h-screen">
                 <CircularProgress />
-            </Box>
+            </div>
         );
     }
 
     return (
-        <div className="bg-gray-50 min-h-screen">
-            <Header />
-            <Container maxWidth="lg" sx={{ mt: 12, mb: 8 }}>
-                {error && (
-                    <Alert severity="error" sx={{ mb: 2 }}>
-                        {error}
-                    </Alert>
-                )}
+        <div className="m-0 p-0 box-border font-primary">
+            <div className="px-6 py-10 xl:py-20 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80 flex flex-col gap-20 xl:gap-25">
+                <div className="bg-gray-50">
+                    <div className="max-w-7xl mx-auto mb-8">
+                        {error && (
+                            <Alert severity="error" className="mb-2">
+                                {error}
+                            </Alert>
+                        )}
 
-                <Grid container spacing={4}>
-                    {/* Admin Profile Overview */}
-                    <Grid item xs={12} md={4}>
-                        <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
-                            <Box sx={{ position: 'relative', textAlign: 'center', mb: 2 }}>
-                                <Avatar
-                                    src={adminData?.profilePictureUrl}
-                                    alt={adminData?.name}
-                                    sx={{ width: 120, height: 120, mx: 'auto', border: '4px solid #f0f0f0' }}
-                                />
-                                <Typography variant="h5" sx={{ mt: 2, fontWeight: 'bold' }}>
-                                    {adminData?.name}
-                                </Typography>
-                                <Chip
-                                    label="Administrator"
-                                    color="primary"
-                                    sx={{ mt: 1 }}
-                                    icon={<MdDashboard />}
-                                />
-                            </Box>
+                        {/* Flexbox layout replaces Grid */}
+                        <div className="flex flex-col md:flex-row gap-6">
+                            {/* Admin Profile Overview */}
+                            <div className="w-full md:w-1/3">
+                                <Paper elevation={3} className="p-6 rounded-2xl flex flex-col items-center">
+                                    <Avatar
+                                        src={adminData?.profilePictureUrl}
+                                        alt={adminData?.name}
+                                        sx={{ width: 120, height: 120, mx: 'auto', border: '4px solid #f0f0f0' }}
+                                    />
 
-                            <Divider sx={{ my: 2 }} />
-
-                            <Stack spacing={2}>
-                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <MdEmail sx={{ color: 'primary.main', mr: 1 }} />
-                                    <Typography>{adminData?.email || 'No email'}</Typography>
-                                </Box>
-                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <MdPhone sx={{ color: 'primary.main', mr: 1 }} />
-                                    <Typography>{adminData?.phoneNumber || 'No phone number'}</Typography>
-                                </Box>
-                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <MdLocationOn sx={{ color: 'primary.main', mr: 1 }} />
-                                    <Typography>{adminData?.address || 'No address'}</Typography>
-                                </Box>
-                                {adminData?.createdAt && (
-                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                        <MdCalendarToday sx={{ color: 'primary.main', mr: 1 }} />
-                                        <Typography>
-                                            Joined: {format(new Date(adminData.createdAt), 'MMMM dd, yyyy')}
-                                        </Typography>
-                                    </Box>
-                                )}
-                            </Stack>
-
-                            <Button
-                                variant="contained"
-                                fullWidth
-                                startIcon={<MdEdit />}
-                                onClick={handleEditToggle}
-                                sx={{ mt: 3 }}
-                            >
-                                Edit Profile
-                            </Button>
-                        </Paper>
-                    </Grid>
-
-                    {/* Admin Details and Management */}
-                    <Grid item xs={12} md={8}>
-                        <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
-                            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
-                                <Tabs value={tabValue} onChange={handleTabChange}>
-                                    <Tab label="Profile Details" icon={<MdPerson />} iconPosition="start" />
-                                    <Tab label="Account Security" icon={<MdLock />} iconPosition="start" />
-                                </Tabs>
-                            </Box>
-
-                            {/* Profile Details Tab */}
-                            {tabValue === 0 && (
-                                <Box>
-                                    <Typography variant="h6" sx={{ mb: 3 }}>
-                                        {editMode ? 'Edit Profile Information' : 'Admin Profile Information'}
+                                    <Typography variant="h5" className="mt-4 font-bold">
+                                        {adminData?.name}
                                     </Typography>
 
-                                    {editMode ? (
-                                        <form onSubmit={handleSubmit}>
-                                            <Grid container spacing={3}>
-                                                <Grid item xs={12} md={6}>
-                                                    <TextField
-                                                        fullWidth
-                                                        label="Name"
-                                                        name="name"
-                                                        value={formData.name}
-                                                        onChange={handleInputChange}
-                                                        required
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12} md={6}>
-                                                    <TextField
-                                                        fullWidth
-                                                        label="Email"
-                                                        name="email"
-                                                        value={formData.email}
-                                                        disabled
-                                                        helperText="Email cannot be changed"
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12} md={6}>
-                                                    <TextField
-                                                        fullWidth
-                                                        label="Phone Number"
-                                                        name="phoneNumber"
-                                                        value={formData.phoneNumber}
-                                                        onChange={handleInputChange}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12} md={6}>
-                                                    <TextField
-                                                        fullWidth
-                                                        label="Profile Picture URL"
-                                                        name="profilePictureUrl"
-                                                        value={formData.profilePictureUrl}
-                                                        onChange={handleInputChange}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12}>
-                                                    <TextField
-                                                        fullWidth
-                                                        label="Address"
-                                                        name="address"
-                                                        value={formData.address}
-                                                        onChange={handleInputChange}
-                                                        multiline
-                                                        rows={2}
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={12}>
-                                                    <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-                                                        <Button
-                                                            variant="outlined"
-                                                            startIcon={<MdClose />}
-                                                            onClick={handleEditToggle}
-                                                        >
-                                                            Cancel
-                                                        </Button>
-                                                        <Button
-                                                            type="submit"
-                                                            variant="contained"
-                                                            startIcon={<MdSave />}
-                                                            disabled={loading}
-                                                        >
-                                                            {loading ? 'Saving...' : 'Save Changes'}
-                                                        </Button>
-                                                    </Box>
-                                                </Grid>
-                                            </Grid>
-                                        </form>
-                                    ) : (
-                                        <Box>
-                                            <Grid container spacing={2}>
-                                                {/* Display all admin fields */}
-                                                {Object.entries(adminData || {}).map(([key, value]) => {
-                                                    // Skip internal fields or null/undefined values
-                                                    if (key === 'id' || key === '__v' || key === 'password' ||
-                                                        key === 'salt' || value === null || value === undefined) {
-                                                        return null;
-                                                    }
+                                    <Chip
+                                        label="Administrator"
+                                        color="primary"
+                                        className="my-2"
+                                        icon={<MdDashboard />}
+                                        sx={{padding: "4px 8px"}}
+                                    />
 
-                                                    // Format dates
-                                                    if (key === 'createdAt' || key === 'updatedAt') {
-                                                        value = format(new Date(value), 'MMMM dd, yyyy HH:mm');
-                                                    }
+                                    <div className="my-6 w-full border-b border-black/7"></div>
 
-                                                    // Format boolean values
-                                                    if (typeof value === 'boolean') {
-                                                        value = value ? 'Yes' : 'No';
-                                                    }
-
-                                                    return (
-                                                        <Grid item xs={12} sm={6} key={key}>
-                                                            <Box sx={{ mb: 2 }}>
-                                                                <Typography variant="subtitle2" color="text.secondary"
-                                                                            sx={{ textTransform: 'capitalize' }}>
-                                                                    {key.replace(/([A-Z])/g, ' $1').trim()}
-                                                                </Typography>
-                                                                <Typography variant="body1">
-                                                                    {typeof value === 'object' ? JSON.stringify(value) : String(value)}
-                                                                </Typography>
-                                                            </Box>
-                                                        </Grid>
-                                                    );
-                                                })}
-                                            </Grid>
+                                    <Stack spacing={2} className="w-full my-2 mb-8 flex flex-col justify-center items-center">
+                                        <Box className="flex items-center gap-2">
+                                            <MdEmail className="text-black" />
+                                            <Typography>{adminData?.email || 'No email'}</Typography>
                                         </Box>
-                                    )}
-                                </Box>
-                            )}
+                                        <Box className="flex items-center gap-2">
+                                            <MdPhone className="text-black" />
+                                            <Typography>{adminData?.phoneNumber || 'No phone number'}</Typography>
+                                        </Box>
+                                        <Box className="flex items-center gap-2">
+                                            <MdLocationOn className="text-black" />
+                                            <Typography>{adminData?.address || 'No address'}</Typography>
+                                        </Box>
+                                        
+                                        {adminData?.createdAt && (
+                                            <Box className="flex items-center gap-2">
+                                                <MdCalendarToday className="text-primary" />
+                                                <Typography>
+                                                    Joined: {format(new Date(adminData.createdAt), 'MMMM dd, yyyy')}
+                                                </Typography>
+                                            </Box>
+                                        )}
+                                    </Stack>
 
-                            {/* Account Security Tab */}
-                            {tabValue === 1 && (
-                                <Box>
-                                    <Typography variant="h6" gutterBottom>
-                                        Account Security
-                                    </Typography>
-                                    <Alert severity="info" sx={{ mb: 3 }}>
-                                        For security reasons, password changes must be made through a separate process.
-                                    </Alert>
-                                    <Typography variant="subtitle1" gutterBottom>
-                                        Account Information
-                                    </Typography>
-                                    <Grid container spacing={2}>
-                                        <Grid item xs={12} sm={6}>
-                                            <Box sx={{ mb: 2 }}>
-                                                <Typography variant="subtitle2" color="text.secondary">
-                                                    User ID
-                                                </Typography>
-                                                <Typography variant="body1">
-                                                    {adminData?.id || 'Not available'}
-                                                </Typography>
-                                            </Box>
-                                        </Grid>
-                                        <Grid item xs={12} sm={6}>
-                                            <Box sx={{ mb: 2 }}>
-                                                <Typography variant="subtitle2" color="text.secondary">
-                                                    Role
-                                                </Typography>
-                                                <Typography variant="body1">
-                                                    {adminData?.role || 'Admin'}
-                                                </Typography>
-                                            </Box>
-                                        </Grid>
-                                        <Grid item xs={12} sm={6}>
-                                            <Box sx={{ mb: 2 }}>
-                                                <Typography variant="subtitle2" color="text.secondary">
-                                                    Email Verified
-                                                </Typography>
-                                                <Typography variant="body1">
-                                                    {adminData?.emailVerified ? 'Yes' : 'No'}
-                                                </Typography>
-                                            </Box>
-                                        </Grid>
-                                        <Grid item xs={12} sm={6}>
-                                            <Box sx={{ mb: 2 }}>
-                                                <Typography variant="subtitle2" color="text.secondary">
-                                                    Last Login
-                                                </Typography>
-                                                <Typography variant="body1">
-                                                    {adminData?.lastLogin ?
-                                                        format(new Date(adminData.lastLogin), 'MMMM dd, yyyy HH:mm') :
-                                                        'Not available'}
-                                                </Typography>
-                                            </Box>
-                                        </Grid>
-                                    </Grid>
-                                </Box>
-                            )}
-                        </Paper>
-                    </Grid>
-                </Grid>
-            </Container>
-            <Footer />
+                                    <Button
+                                        variant="contained"
+                                        fullWidth
+                                        startIcon={<MdEdit />}
+                                        onClick={handleEditToggle}
+                                        sx={{padding: "12px 0"}}                                        
+                                    >
+                                        Edit Profile
+                                    </Button>
+                                </Paper>
+                            </div>
+
+                            {/* Admin Details and Management */}
+                            <div className="w-full md:w-2/3">
+                                <Paper elevation={3} className="p-6 rounded-2xl">
+                                    <div className="border-b border-gray-200 mb-4">
+                                        <Tabs value={tabValue} onChange={handleTabChange}>
+                                            <Tab label="Profile Details" icon={<MdPerson />} iconPosition="start" />
+                                            <Tab label="Account Security" icon={<MdLock />} iconPosition="start" />
+                                        </Tabs>
+                                    </div>
+
+                                    {/* Profile Details Tab */}
+                                    {tabValue === 0 && (
+                                        <div>
+                                            <Typography variant="h6" className="mb-8">
+                                                {editMode ? 'Edit Profile Information' : 'Admin Profile Information'}
+                                            </Typography>
+
+                                            {editMode ? (
+                                                <form onSubmit={handleSubmit}>
+                                                    <div className="flex flex-col md:flex-row md:flex-wrap gap-8 w-full">
+                                                        <TextField
+                                                            fullWidth
+                                                            label="Name"
+                                                            name="name"
+                                                            value={formData.name}
+                                                            onChange={handleInputChange}
+                                                            required
+                                                            className="md:w-[48%]"
+                                                        />
+                                                        <TextField
+                                                            fullWidth
+                                                            label="Email"
+                                                            name="email"
+                                                            value={formData.email}
+                                                            disabled
+                                                            helperText="Email cannot be changed"
+                                                            className="md:w-[48%]"
+                                                        />
+                                                        <TextField
+                                                            fullWidth
+                                                            label="Phone Number"
+                                                            name="phoneNumber"
+                                                            value={formData.phoneNumber}
+                                                            onChange={handleInputChange}
+                                                            className="md:w-[48%]"
+                                                        />
+                                                        <TextField
+                                                            fullWidth
+                                                            label="Profile Picture URL"
+                                                            name="profilePictureUrl"
+                                                            value={formData.profilePictureUrl}
+                                                            onChange={handleInputChange}
+                                                            className="md:w-[48%]"
+                                                            InputProps={{
+                                                                style: { maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis" }
+                                                            }}
+                                                        />
+                                                        <TextField
+                                                            fullWidth
+                                                            label="Address"
+                                                            name="address"
+                                                            value={formData.address}
+                                                            onChange={handleInputChange}
+                                                            multiline
+                                                            rows={2}
+                                                            className="w-full"
+                                                        />
+                                                        <div className="flex gap-2 justify-end w-full mt-2">
+                                                            <Button
+                                                                variant="outlined"
+                                                                startIcon={<MdClose />}
+                                                                onClick={handleEditToggle}
+                                                            >
+                                                                Cancel
+                                                            </Button>
+                                                            <Button
+                                                                type="submit"
+                                                                variant="contained"
+                                                                startIcon={<MdSave />}
+                                                                disabled={loading}
+                                                            >
+                                                                {loading ? 'Saving...' : 'Save Changes'}
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            ) : (
+                                                <div>
+                                                    <div className="flex flex-col md:flex-row md:flex-wrap gap-4 w-full">
+                                                        {/* Display all admin fields */}
+                                                        {Object.entries(adminData || {}).map(([key, value]) => {
+                                                            // Skip internal fields or null/undefined values
+                                                            if (key === 'id' || key === '__v' || key === 'password' ||
+                                                                key === 'salt' || value === null || value === undefined) {
+                                                                return null;
+                                                            }
+
+                                                            // Format dates
+                                                            if (key === 'createdAt' || key === 'updatedAt') {
+                                                                value = format(new Date(value), 'MMMM dd, yyyy HH:mm');
+                                                            }
+
+                                                            // Format boolean values
+                                                            if (typeof value === 'boolean') {
+                                                                value = value ? 'Yes' : 'No';
+                                                            }
+
+                                                            return (
+                                                                <div className="w-full" key={key}>
+                                                                    <Box className="mb-2">
+                                                                        <Typography variant="subtitle2" color="text.primary"
+                                                                                    className="capitalize">
+                                                                            {key.replace(/([A-Z])/g, ' $1').trim()}
+                                                                        </Typography>
+                                                                        
+                                                                        <Typography variant="body1" color="text.primary" sx={{width: "100%", overflow: "hidden", textOverflow: "ellipsis"}}>
+                                                                            {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                                                                        </Typography>
+                                                                    </Box>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Account Security Tab */}
+                                    {tabValue === 1 && (
+                                        <div>
+                                            <Typography variant="h6" gutterBottom>
+                                                Account Security
+                                            </Typography>
+                                            <Alert severity="info" className="mb-4">
+                                                For security reasons, password changes must be made through a separate process.
+                                            </Alert>
+                                            <Typography variant="subtitle1" gutterBottom>
+                                                Account Information
+                                            </Typography>
+                                            <div className="flex flex-col md:flex-row md:flex-wrap gap-4">
+                                                <div className="md:w-[48%]">
+                                                    <Box className="mb-2">
+                                                        <Typography variant="subtitle2" color="text.secondary">
+                                                            User ID
+                                                        </Typography>
+                                                        <Typography variant="body1">
+                                                            {adminData?.id || 'Not available'}
+                                                        </Typography>
+                                                    </Box>
+                                                </div>
+                                                <div className="md:w-[48%]">
+                                                    <Box className="mb-2">
+                                                        <Typography variant="subtitle2" color="text.secondary">
+                                                            Role
+                                                        </Typography>
+                                                        <Typography variant="body1">
+                                                            {adminData?.role || 'Admin'}
+                                                        </Typography>
+                                                    </Box>
+                                                </div>
+                                                <div className="md:w-[48%]">
+                                                    <Box className="mb-2">
+                                                        <Typography variant="subtitle2" color="text.secondary">
+                                                            Email Verified
+                                                        </Typography>
+                                                        <Typography variant="body1">
+                                                            {adminData?.emailVerified ? 'Yes' : 'No'}
+                                                        </Typography>
+                                                    </Box>
+                                                </div>
+                                                <div className="md:w-[48%]">
+                                                    <Box className="mb-2">
+                                                        <Typography variant="subtitle2" color="text.secondary">
+                                                            Last Login
+                                                        </Typography>
+                                                        <Typography variant="body1">
+                                                            {adminData?.lastLogin ?
+                                                                format(new Date(adminData.lastLogin), 'MMMM dd, yyyy HH:mm') :
+                                                                'Not available'}
+                                                        </Typography>
+                                                    </Box>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </Paper>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
