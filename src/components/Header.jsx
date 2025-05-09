@@ -71,8 +71,8 @@ const Header = () => {
         right: -6px;
       }`;
 
-    // Helper: hanya tampilkan badge jika cartCount > 0
-    const showCartBadge = !!cartCount && cartCount > 0;
+    // Helper: hanya tampilkan badge jika cartCount !== null dan cartCount > 0
+    const showCartBadge = typeof cartCount === "number" && cartCount > 0;
 
     return(
         <div className={`px-6 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80 py-2 w-full ${isHomePage ? "bg-transparent" : "bg-white"} ${isHomePage ? "absolute" : "relative"} top-0 border-b-[0.03rem] border-white/25 flex justify-between items-center ${isHomePage ? "shadow-none" : "shadow-2xl/10"}`}>

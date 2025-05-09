@@ -57,7 +57,6 @@ const ProfileUser = () => {
             navigate('/login');
             return;
         }
-
         fetchUserProfile();
     }, [auth.isLoggedIn, navigate]);
 

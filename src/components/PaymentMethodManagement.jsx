@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useAuth } from '../contexts/AuthContext';
 
 const PaymentMethodManagement = () => {
+    const { auth } = useAuth(); // Pindahkan ke sini
     const [methods, setMethods] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -16,13 +18,17 @@ const PaymentMethodManagement = () => {
                 { headers: { apiKey: "24405e01-fbc1-45a5-9f5a-be13afcd757c" } }
             );
             setMethods(res.data.data || []);
-        } catch (err) {
+        } catch {
             setError("Failed to fetch payment methods");
         }
         setLoading(false);
     };
 
     useEffect(() => {
+        if (!auth.isLoggedIn || auth.user?.role !== "admin") {
+            window.location.href = "/";
+            return;
+        }
         fetchMethods();
     }, []);
 
@@ -33,10 +39,10 @@ const PaymentMethodManagement = () => {
             await axios.post(
                 "https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/generate-payment-methods",
                 {},
-                { headers: { apiKey: "24405e01-fbc1-45a5-9f5a-be13afcd757c" } }
+                { headers: { apiKey: "24405e01-fbc1-45a5-9f5a-be13afcd757c", Authorization: `Bearer ${auth.token}` } }
             );
             fetchMethods();
-        } catch (err) {
+        } catch {
             setError("Failed to create payment methods");
         }
         setCreating(false);
@@ -69,8 +75,13 @@ const PaymentMethodManagement = () => {
                                 src={m.logoUrl}
                                 alt={m.name}
                                 className="w-16 h-16 object-contain mb-2"
-                                onError={e => (e.target.style.display = "none")}
+                                onError={event => {
+                                    event.target.onerror = null;
+                                    event.target.src = "https://s31799.pcdn.co/wp-content/uploads/2022/01/credit-icon-2022.png"}}
+                                
+                                
                             />
+
                             <div className="font-semibold text-center">{m.name}</div>
                             <div className="text-xs text-gray-500 text-center mt-1">{m.description}</div>
                         </div>

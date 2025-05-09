@@ -63,7 +63,7 @@ const BannerManagement = () => {
     // Search and pagination
     const [searchBannerId, setSearchBannerId] = useState('');
     const [page, setPage] = useState(1);
-    const [rowsPerPage] = useState(5);
+    const [rowsPerPage] = useState(5); // ubah dari 5 ke 3
 
     // Delete confirmation
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -71,6 +71,10 @@ const BannerManagement = () => {
 
     // Fetch all banners on component mount
     useEffect(() => {
+        if (!auth.isLoggedIn || auth.user?.role !== "admin") {
+            window.location.href = "/";
+            return;
+        }
         fetchAllBanners();
     }, []);
 
@@ -105,8 +109,17 @@ const BannerManagement = () => {
 
         try {
             setLoading(true);
+            setError(null);
+            // Cari banner di list lokal dulu
+            const found = banners.find(b => String(b.id) === searchBannerId.trim());
+            if (found) {
+                setBanners([found]);
+                setLoading(false);
+                return;
+            }
+            // Jika tidak ketemu, coba fetch ke API
             const response = await axios.get(
-                `https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/banner/${searchBannerId}`,
+                `https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/banner/${searchBannerId.trim()}`,
                 {
                     headers: {
                         'Authorization': `Bearer ${auth.token}`,
@@ -114,11 +127,15 @@ const BannerManagement = () => {
                     }
                 }
             );
-
-            // Display the single banner
-            setBanners([response.data.data]);
+            if (response.data && response.data.data) {
+                setBanners([response.data.data]);
+            } else {
+                setBanners([]);
+                setError('Banner not found');
+            }
             setLoading(false);
         } catch (err) {
+            setBanners([]);
             setError('Banner not found or error occurred');
             setLoading(false);
             console.error('Error searching banner:', err);
@@ -375,67 +392,61 @@ const BannerManagement = () => {
                             No banners found
                         </Typography>
                     ) : (
-                        <>
-                            <Grid container spacing={3}>
-                                {paginatedBanners.map((banner) => (
-                                    <Grid item xs={12} sm={6} md={4} key={banner.id}>
-                                        <Card elevation={3}>
-                                            <CardMedia
-                                                component="img"
-                                                height="160"
-                                                image={banner.imageUrl}
-                                                alt={banner.name}
-                                                onError={(e) => {
-                                                    e.target.src = 'https://via.placeholder.com/300x160?text=Image+Not+Available';
-                                                }}
-                                            />
-                                            <CardContent>
-                                                <Typography variant="h6" noWrap title={banner.name}>
-                                                    {banner.name}
-                                                </Typography>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    ID: {banner.id}
-                                                </Typography>
-                                                <Typography variant="body2" color={banner.isActive ? "success.main" : "error.main"}>
-                                                    {banner.isActive ? "Active" : "Inactive"}
-                                                </Typography>
-                                            </CardContent>
-                                            <CardActions>
-                                                {/* Button untuk view banner */}
-                                                <Tooltip title="View">
-                                                    <IconButton onClick={() => handleOpenViewForm(banner)}>
-                                                        <VisibilityIcon />
-                                                    </IconButton>
-                                                </Tooltip>
-                                                {/* Button untuk edit banner */}
-                                                <Tooltip title="Edit">
-                                                    <IconButton onClick={() => handleOpenUpdateForm(banner)}>
-                                                        <EditIcon />
-                                                    </IconButton>
-                                                </Tooltip>
-                                                {/* Button untuk delete banner */}
-                                                <Tooltip title="Delete">
-                                                    <IconButton onClick={() => handleOpenDeleteDialog(banner)} color="error">
-                                                        <DeleteIcon />
-                                                    </IconButton>
-                                                </Tooltip>
-                                            </CardActions>
-                                        </Card>
-                                    </Grid>
-                                ))}
-                            </Grid>
-
-                            {/* Pagination */}
-                            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-                                <Pagination
-                                    count={Math.ceil(banners.length / rowsPerPage)}
-                                    page={page}
-                                    onChange={handleChangePage}
-                                    color="primary"
-                                />
-                            </Box>
-                        </>
+                        <div className="flex flex-row gap-6 w-full justify-center items-stretch py-10">
+                            {paginatedBanners.map((banner) => (
+                                <div
+                                    key={banner.id}
+                                    className="flex flex-col bg-white rounded-lg shadow-md w-full max-w-xs min-w-[220px] flex-1"
+                                >
+                                    <img
+                                        src={banner.imageUrl}
+                                        alt={banner.name}
+                                        className="h-40 w-full object-cover rounded-t-lg"
+                                        onError={e => { e.target.onerror = null; e.target.src = "https://via.placeholder.com/300x160?text=Image+Not+Available"; }}
+                                    />
+                                    <div className="p-4 flex flex-col flex-1">
+                                        <div className="font-semibold text-lg mb-1 truncate" title={banner.name}>{banner.name}</div>
+                                        <div className="text-gray-500 text-xs mb-1">ID: {banner.id}</div>
+                                        <div className={`text-xs font-bold mb-2 ${banner.isActive ? "text-green-600" : "text-red-500"}`}>
+                                            {banner.isActive ? "Active" : "Inactive"}
+                                        </div>
+                                        <div className="flex flex-row gap-2 mt-auto">
+                                            <button
+                                                className="bg-blue-500 text-white px-3 py-1 rounded"
+                                                onClick={() => handleOpenViewForm(banner)}
+                                                title="View"
+                                            >
+                                                <VisibilityIcon fontSize="small" />
+                                            </button>
+                                            <button
+                                                className="bg-yellow-500 text-white px-3 py-1 rounded"
+                                                onClick={() => handleOpenUpdateForm(banner)}
+                                                title="Edit"
+                                            >
+                                                <EditIcon fontSize="small" />
+                                            </button>
+                                            <button
+                                                className="bg-red-500 text-white px-3 py-1 rounded"
+                                                onClick={() => handleOpenDeleteDialog(banner)}
+                                                title="Delete"
+                                            >
+                                                <DeleteIcon fontSize="small" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     )}
+                    {/* Pagination */}
+                    <div className="flex justify-center mt-8">
+                        <Pagination
+                            count={Math.ceil(banners.length / rowsPerPage)}
+                            page={page}
+                            onChange={handleChangePage}
+                            color="primary"
+                        />
+                    </div>
                 </>
             )}
 

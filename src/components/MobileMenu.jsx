@@ -1,9 +1,14 @@
 import {useNavigate, useLocation} from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import { useCart } from "../contexts/CartContext";
 
 import * as React from 'react';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
+import IconButton from '@mui/material/IconButton';
+import Badge from '@mui/material/Badge';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 import { BiRightArrowCircle } from "react-icons/bi";
 import { BiUser } from "react-icons/bi";
@@ -22,6 +27,11 @@ const MobileMenu = ({toogleCloseMenu}) => {
     const toContact = () => {navigate("/contact")};
     const toLogin = () => {navigate("/login")};
     const toRegister = () => {navigate("/register")};
+
+    const { auth, logout } = useAuth();
+    const { cartCount } = useCart();
+    const UserName = auth.user?.name || "";
+    const showCartBadge = typeof cartCount === "number" && cartCount > 0;
 
     //DROPDOWN MENU FOR USER
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -60,42 +70,47 @@ const MobileMenu = ({toogleCloseMenu}) => {
                 <Button onClick={toContact} variant="text" sx={{color:"white", textTransform:"none", fontWeight:"300", fontSize:"35px"}}>Contact</Button>
             </div>
 
-            <div className="flex flex-row justify-between items-center gap-6">
-                <Button onClick={toLogin} variant="text" size="large" startIcon={<BiRightArrowCircle/>} style={{color:"white", fontWeight:"400", textTransform:"none", fontSize:"16px"}}>Sign In</Button>
-                <Button onClick={toRegister} variant="text" size="large" startIcon={<BiUser/>} style={{color:"white", fontWeight:"400", textTransform:"none", fontSize:"16px"}}>Register</Button>
-            </div>
-
-            <div className="flex flex-row justify-start items-center gap-12">
-                {/* DROPPDOWN MENU FOR USER */}
-                <div className="" id="dropdown-menu-user">
-                    <Button id="basic-button" aria-controls={open ? 'basic-menu' : undefined} aria-haspopup="true" aria-expanded={open ? 'true' : undefined} onClick={handleClick}
+            {/* Auth & Cart Section */}
+            <div className="flex flex-row justify-between items-center gap-6 w-full mt-4">
+                {(!auth.isLoggedIn) && (
+                    <>
+                        <Button onClick={toLogin} variant="text" size="large" startIcon={<BiRightArrowCircle/>} style={{color:"white", fontWeight:"400", textTransform:"none", fontSize:"16px"}}>Sign In</Button>
+                        <Button onClick={toRegister} variant="text" size="large" startIcon={<BiUser/>} style={{color:"white", fontWeight:"400", textTransform:"none", fontSize:"16px"}}>Register</Button>
+                    </>
+                )}
+                {auth.isLoggedIn && auth.user?.role === "user" && (
+                    <div id="dropdown-menu-user">
+                        <Button id="basic-button" aria-controls={open ? 'basic-menu' : undefined} aria-haspopup="true" aria-expanded={open ? 'true' : undefined} onClick={handleClick}
                             style={{color: "white", fontWeight:"400", textTransform:"none", fontSize:"14px"}}>
-                        nama-User
-                    </Button>
-                    <Menu id="basic-menu" anchorEl={anchorEl} open={open} onClose={handleClose} MenuListProps={{'aria-labelledby': 'basic-button',}}
-                          style={{color:"#F8616C", fontWeight:"400", textTransform:"none", fontSize:"14px"}}>
-                        <MenuItem onClick={handleClose}>Profile</MenuItem>
-                        <MenuItem onClick={handleClose}>Purchase List</MenuItem>
-                        <MenuItem onClick={handleClose}>Logout</MenuItem>
-                    </Menu>
-                </div>
-
-                {/* DROPPDOWN MENU FOR ADMIN */}
-                <div className="" id="dropdown-menu-admin">
-                    <Button id="basic-button" aria-controls={openAdmin ? 'basic-menu' : undefined} aria-haspopup="true" aria-expanded={open ? 'true' : undefined} onClick={handleClickAdmin}
+                            <div className="flex flex-row gap-2 items-center"><BiUser />{UserName || "User"}</div>
+                        </Button>
+                        <Menu id="basic-menu" anchorEl={anchorEl} open={open} onClose={handleClose} MenuListProps={{'aria-labelledby': 'basic-button',}} style={{color:"#F8616C", fontWeight:"400", textTransform:"none", fontSize:"14px"}}>
+                            <MenuItem onClick={() => {handleClose(); navigate('/profile-user')}}>Profile</MenuItem>
+                            <MenuItem onClick={() => {handleClose(); navigate('/purchase-list')}}>Purchase List</MenuItem>
+                            <MenuItem onClick={() => {handleClose(); logout();}}>Logout</MenuItem>
+                        </Menu>
+                    </div>
+                )}
+                {auth.isLoggedIn && auth.user?.role === "admin" && (
+                    <div id="dropdown-menu-admin">
+                        <Button id="basic-button-admin" aria-controls={openAdmin ? 'basic-menu-admin' : undefined} aria-haspopup="true" aria-expanded={openAdmin ? 'true' : undefined} onClick={handleClickAdmin}
                             style={{color: "white", fontWeight:"400", textTransform:"none", fontSize:"14px"}}>
-                        nama-admin
-                    </Button>
-
-                    <Menu id="basic-menu" anchorEl={anchorElAdmin} open={openAdmin} onClose={handleCloseAdmin} MenuListProps={{'aria-labelledby': 'basic-button',}}
-                          style={{color:"#F8616C", fontWeight:"400", textTransform:"none", fontSize:"14px"}}>
-                        <MenuItem onClick={handleClose}>Profile</MenuItem>
-                        <MenuItem onClick={handleClose}>Dashboard</MenuItem>
-                        <MenuItem onClick={handleClose}>Logout</MenuItem>
-                    </Menu>
-                </div>
+                            {UserName || "Admin"}
+                        </Button>
+                        <Menu id="basic-menu-admin" anchorEl={anchorElAdmin} open={openAdmin} onClose={handleCloseAdmin} MenuListProps={{'aria-labelledby': 'basic-button-admin',}} style={{color:"#F8616C", fontWeight:"400", textTransform:"none", fontSize:"14px"}}>
+                            <MenuItem onClick={() => {handleCloseAdmin(); navigate('/profile-admin')}}>Profile</MenuItem>
+                            <MenuItem onClick={() => {handleCloseAdmin(); navigate('/dashboard-admin')}}>Dashboard</MenuItem>
+                            <MenuItem onClick={() => {handleCloseAdmin(); logout();}}>Logout</MenuItem>
+                        </Menu>
+                    </div>
+                )}
+                <IconButton onClick={() => navigate("/cart")} aria-label="cart">
+                    <ShoppingCartIcon fontSize="small" sx={{color: "white"}}/>
+                    {showCartBadge && (
+                        <Badge badgeContent={cartCount} color="error" overlap="circular" />
+                    )}
+                </IconButton>
             </div>
-
         </div>
     )
 }

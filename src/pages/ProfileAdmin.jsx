@@ -61,17 +61,14 @@ const ProfileAdmin = () => {
 
     // Fetch admin data on component mount
     useEffect(() => {
-        // Check if logged in and if user is admin
         if (!auth.isLoggedIn) {
             navigate('/login');
             return;
         }
-
         if (auth.user && auth.user.role !== 'admin') {
             navigate('/');
             return;
         }
-
         fetchAdminProfile();
     }, [auth.isLoggedIn, auth.user, navigate]);
 

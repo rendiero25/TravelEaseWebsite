@@ -29,7 +29,6 @@ const PurchaseList = () => {
     };
 
     useEffect(() => {
-        // Check if user is logged in
         if (!auth.isLoggedIn) {
             navigate('/login');
             return;

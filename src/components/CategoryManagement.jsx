@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useAuth } from '../contexts/AuthContext';
 
 const API_KEY = "24405e01-fbc1-45a5-9f5a-be13afcd757c";
 
 const CategoryManagement = () => {
+    const { auth } = useAuth();
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -37,6 +39,10 @@ const CategoryManagement = () => {
     };
 
     useEffect(() => {
+        if (!auth.isLoggedIn || auth.user?.role !== "admin") {
+            window.location.href = "/";
+            return;
+        }
         fetchCategories();
     }, []);
 
@@ -80,14 +86,14 @@ const CategoryManagement = () => {
                 await axios.post(
                     "https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/create-category",
                     formData,
-                    { headers: { apiKey: API_KEY, Authorization: `Bearer ${localStorage.getItem("token")}` } }
+                    { headers: { apiKey: API_KEY, Authorization: `Bearer ${auth.token}` } }
                 );
                 setSuccess("Category created!");
             } else {
                 await axios.post(
                     `https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/update-category/${selectedId}`,
                     formData,
-                    { headers: { apiKey: API_KEY, Authorization: `Bearer ${localStorage.getItem("token")}` } }
+                    { headers: { apiKey: API_KEY, Authorization: `Bearer ${auth.token}` } }
                 );
                 setSuccess("Category updated!");
             }
@@ -108,7 +114,7 @@ const CategoryManagement = () => {
         try {
             await axios.delete(
                 `https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/delete-category/${id}`,
-                { headers: { apiKey: API_KEY, Authorization: `Bearer ${localStorage.getItem("token")}` } }
+                { headers: { apiKey: API_KEY, Authorization: `Bearer ${auth.token}` } }              
             );
             setSuccess("Category deleted!");
             fetchCategories();

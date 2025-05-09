@@ -41,6 +41,16 @@ const UserManagement = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
+    const [page, setPage] = useState(1);
+    const [searchTerm, setSearchTerm] = useState("");
+    const rowsPerPage = 10;
+
+    useEffect(() => {
+        if (!auth.isLoggedIn || auth.user?.role !== "admin") {
+            window.location.href = "/";
+            return;
+        }
+    }, [auth]);
 
     // Fetch current user details
     useEffect(() => {
@@ -99,6 +109,11 @@ const UserManagement = () => {
             fetchAllUsers();
         }
     }, [auth.token, activeTab]);
+
+    // Reset page to 1 when allUsers changes
+    useEffect(() => {
+        setPage(1);
+    }, [allUsers]);
 
     // Handle tab change
     const handleTabChange = (event, newValue) => {
@@ -209,8 +224,31 @@ const UserManagement = () => {
             return <Typography variant="body1">No users found</Typography>;
         }
 
+        // Filter users by search term (name)
+        const filteredUsers = allUsers.filter(user =>
+            user.name && user.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+        // Pagination logic
+        const paginatedUsers = filteredUsers.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+        const totalPages = Math.max(1, Math.ceil(filteredUsers.length / rowsPerPage));
+
         return (
-            <TableContainer component={Paper} sx={{ mt: 3 }}>
+            <>
+            {/* Search input */}
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+                <input
+                    type="text"
+                    placeholder="Search by name..."
+                    value={searchTerm}
+                    onChange={e => {
+                        setSearchTerm(e.target.value);
+                        setPage(1);
+                    }}
+                    style={{ padding: 8, borderRadius: 4, border: '1px solid #ccc', minWidth: 220 }}
+                />
+            </Box>
+            <TableContainer component={Paper} sx={{ mt: 0 }}>
                 <Table>
                     <TableHead>
                         <TableRow>
@@ -222,7 +260,7 @@ const UserManagement = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {allUsers.map((user) => (
+                        {paginatedUsers.map((user) => (
                             <TableRow key={user.id}>
                                 <TableCell>{user.name}</TableCell>
                                 <TableCell>{user.email}</TableCell>
@@ -243,6 +281,27 @@ const UserManagement = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
+            {/* Pagination Controls */}
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                <Button
+                    variant="outlined"
+                    onClick={() => setPage(page - 1)}
+                    disabled={page === 1}
+                    sx={{ mr: 1 }}
+                >
+                    Prev
+                </Button>
+                <Typography sx={{ mx: 2, alignSelf: 'center' }}>{page} / {totalPages}</Typography>
+                <Button
+                    variant="outlined"
+                    onClick={() => setPage(page + 1)}
+                    disabled={page === totalPages}
+                    sx={{ ml: 1 }}
+                >
+                    Next
+                </Button>
+            </Box>
+            </>
         );
     };
 

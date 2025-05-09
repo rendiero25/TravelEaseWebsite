@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useAuth } from '../contexts/AuthContext';
 
 const PAGE_SIZE = 10;
 
 const statusOptions = [
-    { value: "PAID", label: "Mark as Paid" },
-    { value: "COMPLETED", label: "Mark as Completed" },
-    { value: "CANCELLED", label: "Cancel" }
+    { value: "success", label: "Mark as Success" },
+    { value: "failed", label: "Mark as Failed" }
 ];
 
 const TransactionManagement = () => {
+    const { auth } = useAuth();
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -18,10 +19,11 @@ const TransactionManagement = () => {
     const [updating, setUpdating] = useState({});
     const [successMsg, setSuccessMsg] = useState("");
 
-    // TODO: Ganti dengan cara ambil token admin dari context jika sudah ada
-    const token = localStorage.getItem("token");
-
     useEffect(() => {
+        if (!auth.isLoggedIn || auth.user?.role !== "admin") {
+            window.location.href = "/";
+            return;
+        }
         fetchTransactions();
         // eslint-disable-next-line
     }, [page]);
@@ -33,7 +35,7 @@ const TransactionManagement = () => {
             const config = {
                 headers: {
                     'apiKey': '24405e01-fbc1-45a5-9f5a-be13afcd757c',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${auth.token}`
                 }
             };
             const res = await axios.get(
@@ -56,7 +58,7 @@ const TransactionManagement = () => {
             const config = {
                 headers: {
                     'apiKey': '24405e01-fbc1-45a5-9f5a-be13afcd757c',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${auth.token}`
                 }
             };
             await axios.post(
@@ -67,9 +69,10 @@ const TransactionManagement = () => {
             setSuccessMsg("Status updated successfully");
             fetchTransactions();
         } catch (err) {
-            setError("Failed to update status");
+            setError(err.response?.data?.errors?.[0]?.message || err.response?.data?.message || "Failed to update status");
+        } finally {
+            setUpdating(prev => ({ ...prev, [id]: false }));
         }
-        setUpdating(prev => ({ ...prev, [id]: false }));
     };
 
     return (
@@ -99,29 +102,45 @@ const TransactionManagement = () => {
                                 <td colSpan={6} className="text-center py-8">No transactions found.</td>
                             </tr>
                         ) : (
-                            transactions.map(tx => (
-                                <tr key={tx.id} className="border-b">
-                                    <td className="px-4 py-2">{tx.id}</td>
-                                    <td className="px-4 py-2">{tx.user?.name || "-"}</td>
-                                    <td className="px-4 py-2">{tx.status}</td>
-                                    <td className="px-4 py-2">{tx.total ? tx.total.toLocaleString("id-ID", { style: "currency", currency: "IDR" }) : "-"}</td>
-                                    <td className="px-4 py-2">{tx.createdAt ? new Date(tx.createdAt).toLocaleString() : "-"}</td>
-                                    <td className="px-4 py-2">
-                                        <div className="flex flex-row gap-2">
-                                            {statusOptions.map(opt => (
-                                                <button
-                                                    key={opt.value}
-                                                    className={`px-3 py-1 rounded text-white text-xs font-semibold ${opt.value === "CANCELLED" ? "bg-red-500" : opt.value === "COMPLETED" ? "bg-green-600" : "bg-blue-500"} disabled:opacity-50`}
-                                                    disabled={updating[tx.id] || tx.status === opt.value}
-                                                    onClick={() => handleStatusUpdate(tx.id, opt.value)}
-                                                >
-                                                    {updating[tx.id] ? "Updating..." : opt.label}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))
+                            // Hitung total transaksi per user
+                            transactions.map(tx => {
+                                const userTransactionCount = {};
+                                transactions.forEach(tx => {
+                                    const userId = tx.user?.id;
+                                    if (userId) {
+                                        userTransactionCount[userId] = (userTransactionCount[userId] || 0) + 1;
+                                    }
+                                });
+                                return (
+                                    <tr key={tx.id} className="border-b">
+                                        <td className="px-4 py-2">{tx.id}</td>
+                                        <td className="px-4 py-2">
+                                            {tx.user?.name || "-"}
+                                            {tx.user?.id && (
+                                                <span className="ml-2 text-xs text-gray-500">(Total: {userTransactionCount[tx.user.id] || 1})</span>
+                                            )}
+                                        </td>
+                                        <td className="px-4 py-2">{tx.status}</td>
+                                        <td className="px-4 py-2">{tx.total ? tx.total.toLocaleString("id-ID", { style: "currency", currency: "IDR" }) : "-"}</td>
+                                        <td className="px-4 py-2">{tx.createdAt ? new Date(tx.createdAt).toLocaleString() : "-"}</td>
+                                        <td className="px-4 py-2">
+                                            <div className="flex flex-row gap-2">
+                                                {statusOptions.map(opt => (
+                                                    <button
+                                                        key={opt.value}
+                                                        className={`px-3 py-1 rounded text-white text-xs font-semibold ${opt.value === "failed" ? "bg-red-500" : opt.value === "success" ? "bg-green-600" : "bg-blue-500"} disabled:opacity-50`}
+                                                        disabled={updating[tx.id]}
+                                                        onClick={() => handleStatusUpdate(tx.id, opt.value)}
+                                                        type="button"
+                                                    >
+                                                        {updating[tx.id] ? "Updating..." : opt.label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })
                         )}
                     </tbody>
                 </table>

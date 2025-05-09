@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useAuth } from '../contexts/AuthContext';
 
 const API_KEY = "24405e01-fbc1-45a5-9f5a-be13afcd757c";
 
@@ -15,6 +16,7 @@ const initialForm = {
 };
 
 const ActivityManagement = () => {
+    const { auth } = useAuth();
     const [activities, setActivities] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -43,6 +45,10 @@ const ActivityManagement = () => {
     };
 
     useEffect(() => {
+        if (!auth.isLoggedIn || auth.user?.role !== "admin") {
+            window.location.href = "/";
+            return;
+        }
         fetchActivities();
     }, []);
 
@@ -109,13 +115,13 @@ const ActivityManagement = () => {
                 await axios.post(
                     "https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/create-activity",
                     payload,
-                    { headers: { apiKey: API_KEY, Authorization: `Bearer ${localStorage.getItem("token")}` } }
+                    { headers: { apiKey: API_KEY, Authorization: `Bearer ${auth.token}` } }
                 );
             } else {
                 await axios.post(
                     `https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/update-activity/${selectedId}`,
                     payload,
-                    { headers: { apiKey: API_KEY, Authorization: `Bearer ${localStorage.getItem("token")}` } }
+                    { headers: { apiKey: API_KEY, Authorization: `Bearer ${auth.token}` } }
                 );
             }
             setModalOpen(false);
@@ -134,7 +140,7 @@ const ActivityManagement = () => {
         try {
             await axios.delete(
                 `https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/delete-activity/${id}`,
-                { headers: { apiKey: API_KEY, Authorization: `Bearer ${localStorage.getItem("token")}` } }
+                { headers: { apiKey: API_KEY, Authorization: `Bearer ${auth.token}` } }
             );
             fetchActivities();
         } catch (err) {

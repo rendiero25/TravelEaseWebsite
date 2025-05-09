@@ -2,9 +2,6 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 
-import Header from "../components/Header";
-import Footer from "../components/Footer";
-
 import * as React from 'react';
 import Button from '@mui/material/Button';
 
@@ -83,8 +80,7 @@ export default function Register() {
 
     return (
         <div className="m-0 p-0 box-border font-primary">
-            <div className="flex flex-col items-center justify-between min-h-screen">
-                <Header />
+            <div className="flex flex-col items-center justify-center min-h-screen xl:-mt-10">
 
                 <div className="flex flex-col justify-between w-full">
                     <div className="py-10 px-6 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80 flex flex-col justify-center items-center w-full">
@@ -182,8 +178,6 @@ export default function Register() {
 
                     </div>
                 </div>
-
-                <div className="w-full"><Footer /></div>
             </div>
         </div>
     );

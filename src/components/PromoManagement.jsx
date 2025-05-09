@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useAuth } from '../contexts/AuthContext';
 
 const API_KEY = "24405e01-fbc1-45a5-9f5a-be13afcd757c";
 
 const PromoManagement = () => {
+    const { auth } = useAuth();
     const [promos, setPromos] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -41,6 +43,10 @@ const PromoManagement = () => {
     };
 
     useEffect(() => {
+        if (!auth.isLoggedIn || auth.user?.role !== "admin") {
+            window.location.href = "/";
+            return;
+        }
         fetchPromos();
     }, []);
 
@@ -106,18 +112,24 @@ const PromoManagement = () => {
         setError("");
         setSuccess("");
         try {
+            // Pastikan harga dan minimum claim dikirim sebagai number
+            const dataToSend = {
+                ...formData,
+                promo_discount_price: Number(formData.promo_discount_price),
+                minimum_claim_price: Number(formData.minimum_claim_price)
+            };
             if (modalMode === "create") {
                 await axios.post(
                     "https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/create-promo",
-                    formData,
-                    { headers: { apiKey: API_KEY, Authorization: `Bearer ${localStorage.getItem("token")}` } }
+                    dataToSend,
+                    { headers: { apiKey: API_KEY, Authorization: `Bearer ${auth.token}` } }
                 );
                 setSuccess("Promo created!");
             } else {
                 await axios.post(
                     `https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/update-promo/${selectedId}`,
-                    formData,
-                    { headers: { apiKey: API_KEY, Authorization: `Bearer ${localStorage.getItem("token")}` } }
+                    dataToSend,
+                    { headers: { apiKey: API_KEY, Authorization: `Bearer ${auth.token}` } }
                 );
                 setSuccess("Promo updated!");
             }
@@ -138,7 +150,7 @@ const PromoManagement = () => {
         try {
             await axios.delete(
                 `https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/delete-promo/${id}`,
-                { headers: { apiKey: API_KEY, Authorization: `Bearer ${localStorage.getItem("token")}` } }
+                { headers: { apiKey: API_KEY, Authorization: `Bearer ${auth.token}` }}
             );
             setSuccess("Promo deleted!");
             fetchPromos();

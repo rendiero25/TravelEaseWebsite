@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {BiCommentDots, BiSearchAlt, BiStar} from "react-icons/bi";
 import Button from "@mui/material/Button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Pagination from "@mui/material/Pagination";
 import Skeleton from "@mui/material/Skeleton";
 
@@ -11,7 +11,8 @@ import Footer from "../components/Footer";
 
 const Activities = () => {
     const navigate = useNavigate();
-    
+    const location = useLocation();
+
     const goToActivityDetails = (activityId) => {
         navigate(`/activity/${activityId}`);
     };
@@ -69,6 +70,18 @@ const Activities = () => {
         setLoading(false);
     };
 
+    // Ambil categoryId dari query string jika ada
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const categoryIdFromQuery = params.get("categoryId");
+        if (categoryIdFromQuery && allActivities.length > 0) {
+            setSearchCategory(categoryIdFromQuery);
+            // Filter activities sesuai categoryId dari query
+            setActivities(allActivities.filter(act => act.category && act.category.id === categoryIdFromQuery));
+        }
+        // eslint-disable-next-line
+    }, [location.search, allActivities]);
+
     // Handle search form submit (local filtering)
     const handleSearch = (e) => {
         e.preventDefault();
@@ -123,25 +136,25 @@ const Activities = () => {
                                     <div className="text-center py-16">No activities found.</div>
                                 ) : (
                                     <>
-                                        <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 xl:gap-4 ">
+                                        <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 xl:gap-4">
                                             {paginatedActivities.map(act => (
                                                 <li 
                                                     key={act.id} 
-                                                    className="group bg-white rounded-xl flex flex-col justify-between gap-4 cursor-pointer"
+                                                    className="group bg-white rounded-lg flex flex-col justify-between gap-4 cursor-pointer border-[0.03rem] border-black/10"
                                                     onClick={() => goToActivityDetails(act.id)}>
 
-                                                    <div className="flex flex-wrap justify-center items-start ">
+                                                    <div className="flex flex-wrap justify-center items-start h-full hover:shadow-2xl/15">
                                                         <div className="flex flex-col justify-between items-start gap-2 w-full h-full">
                                                             <img
                                                                 src={act.imageUrls?.[0]}
                                                                 alt={act.title}
-                                                                className="w-full h-75 xl:h-48 object-cover mb-3 transition-transform duration-300 ease-in-out group-hover:scale-110"
+                                                                className="w-full h-75 xl:h-48 object-cover mb-3 rounded-t-lg"
                                                                 onError={event => {
                                                                     event.target.onerror = null;
                                                                     event.target.src = "https://media.universalparksusa.com/wp-content/uploads/2024/02/Universal-Studios-Hollywood-globe-entrance-scaled.jpg";
                                                                 }}
                                                             />
-                                                            <div className="w-full flex flex-col justify-between items-start gap-2">
+                                                            <div className="w-full flex flex-col justify-between items-start gap-2 px-4">
                                                                 <div className="flex flex-row justify-between items-center gap-1">
                                                                     <BiStar className="size-4 text-yellow-500" />
                                                                     <h4>{act.rating}</h4>
@@ -174,7 +187,7 @@ const Activities = () => {
                                                                 </div>
                                                             </div>
 
-                                                            <div className="text-gray text-sm font-light mt-2 italic">{act.category?.name}</div>
+                                                            <div className="text-gray text-sm font-light mt-2 italic px-4 pb-4">{act.category?.name}</div>
                                                         </div>
 
                                                         

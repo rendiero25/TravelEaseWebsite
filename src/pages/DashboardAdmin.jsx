@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Tabs, Tab, Typography } from "@mui/material";
 import BannerManagement from "../components/BannerManagement";
 import CategoryManagement from "../components/CategoryManagement";
@@ -7,21 +7,30 @@ import PaymentMethodManagement from "../components/PaymentMethodManagement";
 import ActivityManagement from "../components/ActivityManagement";
 import UserManagement from "../components/UserManagement";
 import TransactionManagement from "../components/TransactionManagement";
+import { useAuth } from "../contexts/AuthContext";
 
 const DashboardAdmin = () => {
   const [tab, setTab] = useState(0);
+  const { auth } = useAuth();
+
+  useEffect(() => {
+    if (!auth?.isLoggedIn || auth?.user?.role !== "admin") {
+      window.location.href = "/";
+    }
+  }, [auth]);
 
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
   };
 
   return (
-    <div className="w-full min-h-screen bg-gray-100 py-8 flex flex-col items-center">
-      <div className="w-full max-w-6xl bg-white rounded-xl shadow-lg p-6 flex flex-col">
-        <Typography variant="h4" className="mb-6 font-bold text-2xl text-primary">
+    <div className="m-0 p-0 box-border font-primary">
+      <div className="px-6 py-20 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80 flex flex-col gap-10">
+        <Typography variant="h4" className="font-bold text-2xl text-primary">
           Admin Dashboard
         </Typography>
-        <div className="mb-6 flex flex-row flex-wrap gap-2">
+
+        <div className="flex flex-row flex-wrap gap-2">
           <Tabs
             value={tab}
             onChange={handleTabChange}
@@ -36,9 +45,10 @@ const DashboardAdmin = () => {
             <Tab label="Payment Method" />
             <Tab label="Activity" />
             <Tab label="User" />
-            <Tab label="Transaction" />
+            <Tab label="User Transaction" />
           </Tabs>
         </div>
+
         <div className="flex-1 flex flex-col w-full">
           {tab === 0 && <BannerManagement />}
           {tab === 1 && <CategoryManagement />}

@@ -430,8 +430,43 @@ const Checkout = () => {
                     </Box>
                 );
             case 2:
+                // Ambil objek payment method yang dipilih
+                const selectedMethodObj = paymentMethods.find(
+                    (m) => m.id === selectedPaymentMethod
+                );
                 return (
                     <Box>
+                        <div className="flex flex-col justify-center w-full h-full items-center mb-6">
+                            <div className="flex flex-col mb-4 text-center">
+                                <Typography variant="h7" color="initial" >
+                                    Payment Method
+                                </Typography>
+                                <Typography variant="h6" color="initial" >
+                                    {selectedMethodObj ? selectedMethodObj.name : "-"}
+                                </Typography>
+                                <Typography variant="h7" color="initial" >
+                                    Virtual Account Number: 
+                                </Typography>
+                                <Typography variant="h6" color="initial" >
+                                    0221081298790058 
+                                </Typography>
+                            </div>
+                            
+                            <Typography variant="h7" color="initial" >
+                                Total Payment: 
+                            </Typography>
+                            <Typography variant="h6" color="initial" >
+                                {transactionDetails.total} 
+                            </Typography>
+                            <Typography variant="h7" color="initial" sx={{margin: "12px 0"}}>
+                                *After payment, please upload proof of payment below.
+                            </Typography>
+                        </div>
+
+                        <div>
+                            
+                        </div>
+                        
                         <Typography variant="h6" gutterBottom>
                             Upload Payment Proof
                         </Typography>

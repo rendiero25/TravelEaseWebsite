@@ -49,6 +49,11 @@ const Cart = () => {
             }
         }
 
+        // Jangan fetch cart jika token belum siap
+        if (!auth.token) return;
+
+        setError(null); // Reset error sebelum fetch
+
         const fetchCartItems = async () => {
             try {
                 setLoading(true);
@@ -247,195 +252,191 @@ const Cart = () => {
     }
 
     return (
-        <div className="flex flex-col min-h-screen">
-            <Container className="flex-grow py-8">
-                <Typography variant="h4" component="h1" sx={{ mb: 4, fontWeight: 'bold' }}>
-                    Your Cart
-                </Typography>
+        <div className="m-0 p-0 box-border font-primary">
+            <div className="px-6 py-10 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80">
+                <div className="flex flex-col min-h-screen">
+                    <Container className="flex-grow py-8">
+                        <Typography variant="h4" component="h1" sx={{ mb: 4, fontWeight: 'bold' }}>
+                            Your Cart
+                        </Typography>
 
-                {error && (
-                    <Alert severity="error" sx={{ mb: 2 }}>
-                        {error}
-                    </Alert>
-                )}
+                        {error && (
+                            <Alert severity="error" sx={{ mb: 2 }}>
+                                {error}
+                            </Alert>
+                        )}
 
-                {cartItems.length === 0 ? (
-                    <Paper elevation={2} sx={{ p: 4, textAlign: 'center' }}>
-                        <Typography variant="h6">Your cart is empty</Typography>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            sx={{ mt: 2 }}
-                            onClick={() => navigate('/activities')}
-                        >
-                            Browse Activities
-                        </Button>
-                    </Paper>
-                ) : (
-                    <Grid container spacing={4}>
-                        <Grid item xs={12} md={8}>
-                            <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-                                {cartItems.map((item) => (
-                                    <Box key={item.id} sx={{ mb: 3, pb: 3, borderBottom: '1px solid #eee' }}>
-                                        <Grid container spacing={2}>
-                                            <Grid item xs={12} sm={3}>
-                                                <img
-                                                    src={item.activity.imageUrls?.[0] || 'placeholder.jpg'}
-                                                    alt={item.activity.title}
-                                                    style={{ width: '25%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
-                                                />
-                                            </Grid>
-                                            <Grid item xs={12} sm={9}>
-                                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                                                        {item.activity.title}
-                                                    </Typography>
-                                                    <IconButton
-                                                        color="error"
-                                                        onClick={() => handleRemoveItem(item.id)}
-                                                        disabled={deleteLoading[item.id]}
-                                                    >
-                                                        {deleteLoading[item.id] ? <CircularProgress size={20} /> : <DeleteIcon />}
-                                                    </IconButton>
-                                                </Box>
-                                                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                                                    {item.activity.description?.substring(0, 120)}...
-                                                </Typography>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                                    <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold' }}>
-                                                        ${item.activity.price}
-                                                    </Typography>
-                                                    <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                                                        per person
-                                                    </Typography>
-                                                </Box>
-
-                                                <Grid container spacing={2}>
-                                                    <Grid item xs={12} sm={6}>
-                                                        <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                                            <DatePicker
-                                                                label="Booking Date"
-                                                                value={bookingDates[item.id]}
-                                                                onChange={(date) => handleDateChange(item.id, date)}
-                                                                format="dd/MM/yyyy"
-                                                                sx={{ width: '100%' }}
-                                                            />
-                                                        </LocalizationProvider>
-                                                    </Grid>
-                                                    <Grid item xs={12} sm={6}>
-                                                        <TextField
-                                                            label="Quantity"
-                                                            type="number"
-                                                            value={quantities[item.id] || 1}
-                                                            InputProps={{
-                                                                readOnly: true,
-                                                                startAdornment: (
-                                                                    <InputAdornment position="start">
-                                                                        <IconButton
-                                                                            onClick={() => handleQuantityChange(item.id, -1)}
-                                                                            disabled={quantities[item.id] <= 1}
-                                                                        >
-                                                                            <RemoveIcon />
-                                                                        </IconButton>
-                                                                    </InputAdornment>
-                                                                ),
-                                                                endAdornment: (
-                                                                    <InputAdornment position="end">
-                                                                        <IconButton
-                                                                            onClick={() => handleQuantityChange(item.id, 1)}
-                                                                        >
-                                                                            <AddIcon />
-                                                                        </IconButton>
-                                                                    </InputAdornment>
-                                                                )
-                                                            }}
-                                                            sx={{ width: '100%' }}
-                                                        />
-                                                    </Grid>
-                                                </Grid>
-                                            </Grid>
-                                        </Grid>
-                                    </Box>
-                                ))}
-                            </Paper>
-                        </Grid>
-
-                        <Grid item xs={12} md={4}>
-                            <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-                                <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-                                    Order Summary
-                                </Typography>
-
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                                    <Typography>Subtotal</Typography>
-                                    <Typography>${subtotal.toFixed(2)}</Typography>
-                                </Box>
-
-                                {discount > 0 && (
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                                        <Typography>Discount</Typography>
-                                        <Typography color="error">-${discount.toFixed(2)}</Typography>
-                                    </Box>
-                                )}
-
-                                <Divider sx={{ my: 2 }} />
-
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-                                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Total</Typography>
-                                    <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold' }}>
-                                        ${total.toFixed(2)}
-                                    </Typography>
-                                </Box>
-
-                                <form onSubmit={handlePromoCodeSubmit}>
-                                    <TextField
-                                        label="Promo Code"
-                                        fullWidth
-                                        value={promoCode}
-                                        onChange={(e) => setPromoCode(e.target.value)}
-                                        InputProps={{
-                                            endAdornment: (
-                                                <InputAdornment position="end">
-                                                    <Button
-                                                        type="submit"
-                                                        disabled={promoLoading || !promoCode.trim()}
-                                                    >
-                                                        {promoLoading ? <CircularProgress size={24} /> : 'Apply'}
-                                                    </Button>
-                                                </InputAdornment>
-                                            )
-                                        }}
-                                        sx={{ mb: 2 }}
-                                    />
-                                </form>
-
-                                {promoError && (
-                                    <Alert severity="error" sx={{ mb: 2 }}>
-                                        {promoError}
-                                    </Alert>
-                                )}
-
-                                {promoSuccess && (
-                                    <Alert severity="success" sx={{ mb: 2 }}>
-                                        {promoSuccess}
-                                    </Alert>
-                                )}
-
+                        {cartItems.length === 0 ? (
+                            <Paper elevation={2} sx={{ p: 4, textAlign: 'center' }}>
+                                <Typography variant="h6">Your cart is empty</Typography>
                                 <Button
                                     variant="contained"
                                     color="primary"
-                                    fullWidth
-                                    size="large"
-                                    onClick={handleCheckout}
-                                    disabled={checkoutLoading || cartItems.length === 0}
+                                    sx={{ mt: 2 }}
+                                    onClick={() => navigate('/activities')}
                                 >
-                                    {checkoutLoading ? <CircularProgress size={24} /> : 'Proceed to Checkout'}
+                                    Browse Activities
                                 </Button>
                             </Paper>
-                        </Grid>
-                    </Grid>
-                )}
-            </Container>
+                        ) : (
+                            <div className="flex flex-col md:flex-row gap-8">
+                                {/* Cart Items */}
+                                <div className="w-full md:w-2/3">
+                                    <Paper elevation={2} className="p-6 mb-6">
+                                        {cartItems.map((item) => (
+                                            <Box key={item.id} className="mb-6 pb-6 border-b border-gray-200">
+                                                <div className="flex flex-col sm:flex-row gap-4">
+                                                    <div className="w-full sm:w-1/4 flex-shrink-0 flex items-center">
+                                                        <img
+                                                            src={item.activity.imageUrls?.[0] || 'placeholder.jpg'}
+                                                            alt={item.activity.title}
+                                                            className="w-32 h-32 object-cover rounded-lg"
+                                                        />
+                                                    </div>
+                                                    <div className="w-full sm:w-3/4 flex flex-col gap-4">
+                                                        <div className="flex justify-between items-start">
+                                                            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                                                {item.activity.title}
+                                                            </Typography>
+                                                            <IconButton
+                                                                color="error"
+                                                                onClick={() => handleRemoveItem(item.id)}
+                                                                disabled={deleteLoading[item.id]}
+                                                            >
+                                                                {deleteLoading[item.id] ? <CircularProgress size={20} /> : <DeleteIcon />}
+                                                            </IconButton>
+                                                        </div>
+                                                        <Typography variant="body2" color="text.secondary" className="mb-2">
+                                                            {item.activity.description?.substring(0, 120)}...
+                                                        </Typography>
+                                                        <div className="flex items-center mb-3 gap-2">
+                                                            <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold' }}>
+                                                                ${item.activity.price}
+                                                            </Typography>
+                                                            <Typography variant="body2" color="text.secondary" className="ml-2">
+                                                                per person
+                                                            </Typography>
+                                                        </div>
+                                                        <div className="flex flex-col sm:flex-row gap-4">
+                                                            <div className="w-full sm:w-1/2">
+                                                                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                                                    <DatePicker
+                                                                        label="Booking Date"
+                                                                        value={bookingDates[item.id]}
+                                                                        onChange={(date) => handleDateChange(item.id, date)}
+                                                                        format="dd/MM/yyyy"
+                                                                        sx={{ width: '100%' }}
+                                                                    />
+                                                                </LocalizationProvider>
+                                                            </div>
+                                                            <div className="w-full sm:w-1/2">
+                                                                <TextField
+                                                                    label="Quantity"
+                                                                    type="number"
+                                                                    value={quantities[item.id] || 1}
+                                                                    InputProps={{
+                                                                        readOnly: true,
+                                                                        startAdornment: (
+                                                                            <InputAdornment position="start">
+                                                                                <IconButton
+                                                                                    onClick={() => handleQuantityChange(item.id, -1)}
+                                                                                    disabled={quantities[item.id] <= 1}
+                                                                                >
+                                                                                    <RemoveIcon />
+                                                                                </IconButton>
+                                                                            </InputAdornment>
+                                                                        ),
+                                                                        endAdornment: (
+                                                                            <InputAdornment position="end">
+                                                                                <IconButton
+                                                                                    onClick={() => handleQuantityChange(item.id, 1)}
+                                                                                >
+                                                                                    <AddIcon />
+                                                                                </IconButton>
+                                                                            </InputAdornment>
+                                                                        )
+                                                                    }}
+                                                                    sx={{ width: '100%' }}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </Box>
+                                        ))}
+                                    </Paper>
+                                </div>
+                                {/* Order Summary */}
+                                <div className="w-full md:w-1/3">
+                                    <Paper elevation={2} className="p-6 mb-6">
+                                        <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+                                            Order Summary
+                                        </Typography>
+                                        <div className="flex justify-between mb-2">
+                                            <Typography>Subtotal</Typography>
+                                            <Typography>${subtotal.toFixed(2)}</Typography>
+                                        </div>
+                                        {discount > 0 && (
+                                            <div className="flex justify-between mb-2">
+                                                <Typography>Discount</Typography>
+                                                <Typography color="error">-${discount.toFixed(2)}</Typography>
+                                            </div>
+                                        )}
+                                        <Divider sx={{ my: 2 }} />
+                                        <div className="flex justify-between mb-4">
+                                            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Total</Typography>
+                                            <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold' }}>
+                                                ${total.toFixed(2)}
+                                            </Typography>
+                                        </div>
+                                        <form onSubmit={handlePromoCodeSubmit}>
+                                            <TextField
+                                                label="Promo Code"
+                                                fullWidth
+                                                value={promoCode}
+                                                onChange={(e) => setPromoCode(e.target.value)}
+                                                InputProps={{
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <Button
+                                                                type="submit"
+                                                                disabled={promoLoading || !promoCode.trim()}
+                                                            >
+                                                                {promoLoading ? <CircularProgress size={24} /> : 'Apply'}
+                                                            </Button>
+                                                        </InputAdornment>
+                                                    )
+                                                }}
+                                                sx={{ mb: 2 }}
+                                            />
+                                        </form>
+                                        {promoError && (
+                                            <Alert severity="error" sx={{ mb: 2 }}>
+                                                {promoError}
+                                            </Alert>
+                                        )}
+                                        {promoSuccess && (
+                                            <Alert severity="success" sx={{ mb: 2 }}>
+                                                {promoSuccess}
+                                            </Alert>
+                                        )}
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            fullWidth
+                                            size="large"
+                                            onClick={handleCheckout}
+                                            disabled={checkoutLoading || cartItems.length === 0}
+                                        >
+                                            {checkoutLoading ? <CircularProgress size={24} /> : 'Proceed to Checkout'}
+                                        </Button>
+                                    </Paper>
+                                </div>
+                            </div>
+                        )}
+                    </Container>
+                </div>
+            </div>
         </div>
     );
 };
