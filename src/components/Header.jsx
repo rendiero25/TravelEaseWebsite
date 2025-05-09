@@ -71,6 +71,9 @@ const Header = () => {
         right: -6px;
       }`;
 
+    // Helper: hanya tampilkan badge jika cartCount > 0
+    const showCartBadge = !!cartCount && cartCount > 0;
+
     return(
         <div className={`px-6 sm:px-12 xl:px-22 3xl:px-42 4xl:px-80 py-2 w-full ${isHomePage ? "bg-transparent" : "bg-white"} ${isHomePage ? "absolute" : "relative"} top-0 border-b-[0.03rem] border-white/25 flex justify-between items-center ${isHomePage ? "shadow-none" : "shadow-2xl/10"}`}>
             <div className="w-50vw flex flex-row justify-between items-center gap-18">
@@ -134,7 +137,7 @@ const Header = () => {
 
                         <Menu id="basic-menu-admin" anchorEl={anchorElAdmin} open={openAdmin} onClose={handleCloseAdmin} MenuListProps={{'aria-labelledby': 'basic-button-admin',}}>
                             <MenuItem onClick={() => navigate('/profile-admin')}>Profile</MenuItem>
-                            <MenuItem onClick={handleCloseAdmin}>Dashboard</MenuItem>
+                            <MenuItem onClick={() => navigate('/dashboard-admin')}>Dashboard</MenuItem>
                             <MenuItem onClick={() => { handleCloseAdmin(); logout(); }}>Logout</MenuItem>
                         </Menu>
                     </div>
@@ -143,7 +146,9 @@ const Header = () => {
                 <div>
                     <IconButton onClick={() => navigate("/cart")} aria-label="cart">
                         <ShoppingCartIcon fontSize="small" sx={{color: isHomePage ? "white" : "#F8616C"}}/>
-                        <CartBadge badgeContent={cartCount} color="primary" overlap="circular" />
+                        {showCartBadge && (
+                            <CartBadge badgeContent={cartCount} color="primary" overlap="circular" />
+                        )}
                     </IconButton>
                 </div>
             </div>

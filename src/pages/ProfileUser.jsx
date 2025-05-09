@@ -50,6 +50,7 @@ const ProfileUser = () => {
         profilePictureUrl: "",
         address: "",
     });
+    const [success, setSuccess] = useState(null);
 
     useEffect(() => {
         if (!auth.isLoggedIn) {
@@ -100,6 +101,8 @@ const ProfileUser = () => {
 
     const handleEditToggle = () => {
         setEditMode(!editMode);
+        setError(null);
+        setSuccess(null);
         if (!editMode) {
             setFormData({
                 name: userData.name || "",
@@ -121,9 +124,10 @@ const ProfileUser = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError(null);
+        setSuccess(null);
+        setLoading(true);
         try {
-            setLoading(true);
-
             const config = {
                 headers: {
                     'apiKey': '24405e01-fbc1-45a5-9f5a-be13afcd757c',
@@ -143,22 +147,27 @@ const ProfileUser = () => {
                 config
             );
 
-            setUserData(prev => ({
-                ...prev,
-                ...dataToUpdate
-            }));
+            // Pastikan response OK dan ada data
+            if (response.data && response.data.status === "OK") {
+                setUserData(prev => ({
+                    ...prev,
+                    ...dataToUpdate
+                }));
 
-            updateUserData({
-                ...auth.user,
-                ...dataToUpdate
-            });
+                updateUserData({
+                    ...auth.user,
+                    ...dataToUpdate
+                });
 
-            setEditMode(false);
-            setLoading(false);
-
-            alert("Profile updated successfully!");
+                setEditMode(false);
+                setSuccess("Profile updated successfully!");
+                setError(null);
+            } else {
+                setError(response.data?.message || "Failed to update profile");
+            }
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to update profile');
+        } finally {
             setLoading(false);
         }
     };
@@ -277,6 +286,16 @@ const ProfileUser = () => {
                                                 {editMode ? "Cancel" : "Edit Profile"}
                                             </Button>
                                         </div>
+                                        {success && (
+                                            <Alert severity="success" sx={{ mb: 2 }}>
+                                                {success}
+                                            </Alert>
+                                        )}
+                                        {error && (
+                                            <Alert severity="error" sx={{ mb: 2 }}>
+                                                {error}
+                                            </Alert>
+                                        )}
                                         {editMode ? (
                                             <form onSubmit={handleSubmit}>
                                                 <div className="flex flex-col gap-4">

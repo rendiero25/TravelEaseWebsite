@@ -310,8 +310,23 @@ const PurchaseList = () => {
                                                     )}
                                                 </div>
                                                 <div className="text-right md:text-right flex-1">
-                                                    <div className="text-sm text-gray-700">Subtotal: {formatCurrency(transaction.totalAmount || 0)}</div>
-                                                    <div className="font-bold text-lg mt-1">Total: {formatCurrency(transaction.totalAmount || 0)}</div>
+                                                    {/* Hitung subtotal dan total berdasarkan quantity masing-masing item */}
+                                                    {(() => {
+                                                        const total = (transaction.transaction_items || []).reduce(
+                                                            (sum, item) => sum + ((item.price || 0) * (item.quantity || 1)),
+                                                            0
+                                                        );
+                                                        return (
+                                                            <>
+                                                                <div className="text-sm text-gray-700">
+                                                                    Subtotal: {formatCurrency(total)}
+                                                                </div>
+                                                                <div className="font-bold text-lg mt-1">
+                                                                    Total: {formatCurrency(total)}
+                                                                </div>
+                                                            </>
+                                                        );
+                                                    })()}
                                                 </div>
                                             </div>
 

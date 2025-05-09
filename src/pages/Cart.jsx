@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext.jsx";
+import { useCart } from "../contexts/CartContext.jsx";
 
 import {
     Button, TextField, Container, Typography, Box, Grid,
@@ -18,6 +19,7 @@ import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 
 const Cart = () => {
     const { auth } = useAuth();
+    const { fetchCartCount } = useCart();
     const navigate = useNavigate();
     const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -39,8 +41,12 @@ const Cart = () => {
     useEffect(() => {
         // Redirect if not logged in
         if (!auth.isLoggedIn) {
-            navigate('/login');
-            return;
+            // Cek localStorage auth, jika ada, setAuth otomatis oleh AuthProvider
+            const storedAuth = localStorage.getItem('auth');
+            if (!storedAuth) {
+                navigate('/login');
+                return;
+            }
         }
 
         const fetchCartItems = async () => {
@@ -160,6 +166,11 @@ const Cart = () => {
             calculateSubtotal(updatedItems, quantities);
 
             setDeleteLoading(prev => ({ ...prev, [itemId]: false }));
+
+            // Update cartCount di header setelah hapus item
+            if (fetchCartCount) {
+                fetchCartCount();
+            }
         } catch (err) {
             console.error("Failed to remove item from cart", err);
             setError('Failed to remove item from cart');
@@ -271,7 +282,7 @@ const Cart = () => {
                                                 <img
                                                     src={item.activity.imageUrls?.[0] || 'placeholder.jpg'}
                                                     alt={item.activity.title}
-                                                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
+                                                    style={{ width: '25%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
                                                 />
                                             </Grid>
                                             <Grid item xs={12} sm={9}>

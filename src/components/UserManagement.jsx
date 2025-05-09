@@ -48,11 +48,12 @@ const UserManagement = () => {
             try {
                 setLoading(true);
                 const response = await axios.get(
-                    'https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/user',
+                    'https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/all-user',
                     {
                         headers: {
                             'Authorization': `Bearer ${auth.token}`,
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            'apiKey': '24405e01-fbc1-45a5-9f5a-be13afcd757c'
                         }
                     }
                 );
@@ -80,7 +81,8 @@ const UserManagement = () => {
                     {
                         headers: {
                             'Authorization': `Bearer ${auth.token}`,
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            'apiKey': '24405e01-fbc1-45a5-9f5a-be13afcd757c'
                         }
                     }
                 );
@@ -127,7 +129,8 @@ const UserManagement = () => {
                 {
                     headers: {
                         'Authorization': `Bearer ${auth.token}`,
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'apiKey': '24405e01-fbc1-45a5-9f5a-be13afcd757c'
                     }
                 }
             );

@@ -338,6 +338,7 @@ const BannerManagement = () => {
                         InputProps={{
                             endAdornment: (
                                 <InputAdornment position="end">
+                                    {/* Button untuk mencari banner */}
                                     <IconButton onClick={handleSearchBanner} edge="end">
                                         <SearchIcon />
                                     </IconButton>
@@ -351,6 +352,7 @@ const BannerManagement = () => {
                     </Button>
                 </Box>
 
+                {/* Button untuk membuat banner */}
                 <Button
                     variant="contained"
                     color="primary"
@@ -399,16 +401,19 @@ const BannerManagement = () => {
                                                 </Typography>
                                             </CardContent>
                                             <CardActions>
+                                                {/* Button untuk view banner */}
                                                 <Tooltip title="View">
                                                     <IconButton onClick={() => handleOpenViewForm(banner)}>
                                                         <VisibilityIcon />
                                                     </IconButton>
                                                 </Tooltip>
+                                                {/* Button untuk edit banner */}
                                                 <Tooltip title="Edit">
                                                     <IconButton onClick={() => handleOpenUpdateForm(banner)}>
                                                         <EditIcon />
                                                     </IconButton>
                                                 </Tooltip>
+                                                {/* Button untuk delete banner */}
                                                 <Tooltip title="Delete">
                                                     <IconButton onClick={() => handleOpenDeleteDialog(banner)} color="error">
                                                         <DeleteIcon />

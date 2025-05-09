@@ -131,9 +131,25 @@ const TransactionDetails = () => {
                 </Typography>
                 <Divider sx={{ my: 2 }} />
                 <Typography variant="h6" sx={{ mb: 1 }}>Summary:</Typography>
-                <Typography variant="body2">Subtotal: {formatCurrency(transaction.subtotal || 0)}</Typography>
-                <Typography variant="body2">Discount: {formatCurrency(transaction.discount || 0)}</Typography>
-                <Typography variant="body2" sx={{ fontWeight: "bold" }}>Total: {formatCurrency(transaction.totalAmount || 0)}</Typography>
+                {(() => {
+                    // Hitung subtotal dari semua item (price * quantity)
+                    const subtotal = (transaction.transaction_items || []).reduce(
+                        (sum, item) => sum + ((item.price || 0) * (item.quantity || 1)),
+                        0
+                    );
+                    // Diskon jika ada, fallback ke 0
+                    const discount = transaction.discount || 0;
+                    const total = subtotal - discount;
+                    return (
+                        <>
+                            <Typography variant="body2">Subtotal: {formatCurrency(subtotal)}</Typography>
+                            <Typography variant="body2">Discount: {formatCurrency(discount)}</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+                                Total: {formatCurrency(total)}
+                            </Typography>
+                        </>
+                    );
+                })()}
                 <Divider sx={{ my: 2 }} />
                 <Button variant="contained" color="primary" onClick={() => navigate('/purchase-list')}>Back to Purchase List</Button>
             </Paper>
