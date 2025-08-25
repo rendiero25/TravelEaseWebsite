@@ -5,6 +5,7 @@ import Button from "@mui/material/Button";
 import { useNavigate, useLocation } from "react-router-dom";
 import Pagination from "@mui/material/Pagination";
 import Skeleton from "@mui/material/Skeleton";
+import OnErrorImage from '../assets/images/onerrorimage.jpg';
 
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -151,7 +152,7 @@ const Activities = () => {
                                                                 className="w-full h-75 xl:h-48 object-cover mb-3 rounded-t-lg"
                                                                 onError={event => {
                                                                     event.target.onerror = null;
-                                                                    event.target.src = "https://media.universalparksusa.com/wp-content/uploads/2024/02/Universal-Studios-Hollywood-globe-entrance-scaled.jpg";
+                                                                    event.target.src = OnErrorImage;
                                                                 }}
                                                             />
                                                             <div className="w-full flex flex-col justify-between items-start gap-2 px-4">

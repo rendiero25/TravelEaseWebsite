@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext.jsx";
+import { useCart } from "../contexts/CartContext.jsx";
 import { format } from "date-fns";
 
 import {
@@ -13,6 +14,7 @@ import Pagination from '@mui/material/Pagination';
 
 const PurchaseList = () => {
     const { auth } = useAuth();
+    const { fetchCartCount } = useCart();
     const navigate = useNavigate();
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -58,6 +60,12 @@ const PurchaseList = () => {
 
                 setTransactions(txs);
                 setLoading(false);
+
+                // Refresh cart count when purchase history is loaded
+                // This ensures cart count is updated if transactions were completed
+                if (fetchCartCount) {
+                    fetchCartCount();
+                }
             } catch (err) {
                 console.error("Failed to fetch transactions", err);
                 setError(err.response?.data?.message || 'Failed to load transaction history');
@@ -66,7 +74,7 @@ const PurchaseList = () => {
         };
 
         fetchTransactions();
-    }, [auth, navigate]);
+    }, [auth, navigate, fetchCartCount]);
 
     // Helper function to format status with appropriate colors
     const getStatusChip = (status) => {
@@ -156,7 +164,7 @@ const PurchaseList = () => {
                                     return (
                                         <div key={transaction.id} className="rounded-2xl overflow-hidden bg-white flex flex-col h-full">
                                             {/* Transaction Header */}
-                                            <div className="p-6 bg-primary text-white flex flex-col md:flex-row gap-6 md:items-center md:justify-between">
+                                            <div className={`p-6 ${['paid', 'completed', 'success'].includes(transaction.status?.toLowerCase()) ? 'bg-green-500 text-black' : 'bg-primary text-white'} flex flex-col md:flex-row gap-6 md:items-center md:justify-between`}>
                                                 <div className="flex flex-col gap-2">
                                                     <div className="text-sm font-semibold">Transaction ID: {transaction.id}</div>
                                                     {/* Show purchased activity names */}
@@ -168,7 +176,7 @@ const PurchaseList = () => {
                                                                     <IconButton
                                                                         size="medium"
                                                                         onClick={() => handleExpandClick(transaction.id)}
-                                                                        sx={{ ml: 1, color: "white" }}
+                                                                        sx={{ ml: 1, color: ['paid', 'completed', 'success'].includes(transaction.status?.toLowerCase()) ? "black" : "white" }}
                                                                     >
                                                                         <BiChevronDown style={{
                                                                             transform: expanded[transaction.id] ? "rotate(180deg)" : "rotate(0deg)",

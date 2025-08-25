@@ -91,7 +91,7 @@ const TopActivities = () => {
                                         <img
                                             src={activitiesdata.imageUrls[0]}
                                             alt="activities-image"
-                                            className="w-full h-full object-cover"
+                                            className="w-[20rem] h-[25rem] object-cover"
                                             onError={event => {
                                                 event.target.onerror = null;
                                                 event.target.src = "https://media.universalparksusa.com/wp-content/uploads/2024/02/Universal-Studios-Hollywood-globe-entrance-scaled.jpg";

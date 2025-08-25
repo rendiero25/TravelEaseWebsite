@@ -64,8 +64,16 @@ export const CartProvider = ({ children }) => {
         }
     };
 
+    const decrementCartCount = () => {
+        setCartCount(prevCount => Math.max(0, prevCount - 1));
+    };
+
+    const resetCartCount = () => {
+        setCartCount(0);
+    };
+
     return (
-        <CartContext.Provider value={{ cartCount, addToCart, fetchCartCount }}>
+        <CartContext.Provider value={{ cartCount, addToCart, fetchCartCount, decrementCartCount, resetCartCount }}>
             {children}
         </CartContext.Provider>
     );

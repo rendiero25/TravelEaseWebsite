@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../contexts/AuthContext.jsx";
+import { useCart } from "../contexts/CartContext.jsx";
 import { format } from "date-fns";
 
 import {
@@ -17,6 +18,7 @@ import { MdPayment, MdShoppingCart, MdLocationOn } from "react-icons/md";
 const Checkout = () => {
     const navigate = useNavigate();
     const { auth } = useAuth();
+    const { fetchCartCount, resetCartCount } = useCart();
     const [transactionDetails, setTransactionDetails] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -120,7 +122,28 @@ const Checkout = () => {
     };
 
     const handleBack = () => {
-        setActiveStep((prevActiveStep) => prevActiveStep - 1);
+        if (activeStep === 0) {
+            // If in Review Order step, go back to cart
+            navigate('/cart');
+        } else {
+                if (activeStep === 0) {
+                    // Navigate back to cart if we're on the first step (Review Order)
+                    navigate('/cart');
+                } else {
+                        if (activeStep === 0) {
+                            // If we're at Review Order step, go back to Cart
+                            navigate('/cart');
+                        } else {
+                            // Otherwise go to previous step
+                                if (activeStep === 0) {
+                                    // If on Review Order step, go back to cart
+                                    navigate('/cart');
+                                } else {
+                                    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+                                }
+                        }
+                }
+        }
     };
 
     const createTransaction = async () => {
@@ -159,6 +182,11 @@ const Checkout = () => {
             );
 
             console.log("Transaction created:", response.data);
+
+            // Reset cart count since items are now in transaction
+            if (resetCartCount) {
+                resetCartCount();
+            }
 
             // Store transaction ID for next steps
             setPaymentSuccess(true);
@@ -282,6 +310,10 @@ const Checkout = () => {
                 setConfirmationSuccess(true);
                 // Clear transaction from session storage as it's complete
                 sessionStorage.removeItem('transactionDetails');
+                // Refresh cart count since transaction is complete
+                if (fetchCartCount) {
+                    await fetchCartCount();
+                }
             }
         } catch (err) {
             console.error("Failed to confirm transaction (simulation)", err);
@@ -289,7 +321,11 @@ const Checkout = () => {
         }
     };
 
-    const handleFinish = () => {
+    const handleFinish = async () => {
+        // Refresh cart count before navigating
+        if (fetchCartCount) {
+            await fetchCartCount();
+        }
         // Navigate to purchase history or home
         navigate('/purchase-list');
     };
@@ -332,10 +368,20 @@ const Checkout = () => {
                                     {transactionDetails.items.map((item) => (
                                         <ListItem key={item.id} sx={{ mb: 2, border: '1px solid #eee', borderRadius: 2 }}>
                                             <ListItemAvatar>
-                                                <Avatar
-                                                    variant="rounded"
-                                                    src={item.activity?.imageUrls?.[0] || ''}
-                                                    sx={{ width: 80, height: 80, mr: 2 }}
+                                                <img
+                                                    src={item.activity?.imageUrls?.[0] || 'https://images.unsplash.com/photo-1623883282543-067fbe8c85e1?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fGFtdXNlbWVudCUyMHBhcmt8ZW58MHwyfDB8fHww'}
+                                                    alt={item.activity?.title || 'Activity Image'}
+                                                    style={{ 
+                                                        width: 80, 
+                                                        height: 80, 
+                                                        marginRight: 16, 
+                                                        objectFit: 'cover', 
+                                                        borderRadius: 8 
+                                                    }}
+                                                    onError={(e) => {
+                                                        e.target.onerror = null;
+                                                        e.target.src = 'https://images.unsplash.com/photo-1623883282543-067fbe8c85e1?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fGFtdXNlbWVudCUyMHBhcmt8ZW58MHwyfDB8fHww';
+                                                    }}
                                                 />
                                             </ListItemAvatar>
                                             <ListItemText
@@ -611,7 +657,7 @@ const Checkout = () => {
 
                             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                 <Button
-                                    disabled={activeStep === 0 || activeStep === steps.length - 1}
+                                    disabled={activeStep === steps.length - 1}
                                     onClick={handleBack}
                                     startIcon={<BiArrowBack />}
                                 >

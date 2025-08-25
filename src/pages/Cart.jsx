@@ -19,7 +19,7 @@ import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 
 const Cart = () => {
     const { auth } = useAuth();
-    const { fetchCartCount } = useCart();
+    const { fetchCartCount, decrementCartCount } = useCart();
     const navigate = useNavigate();
     const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -168,13 +168,19 @@ const Cart = () => {
 
             const updatedItems = cartItems.filter(item => item.id !== itemId);
             setCartItems(updatedItems);
-            calculateSubtotal(updatedItems, quantities);
+
+            // Update quantities state to remove deleted item
+            const updatedQuantities = { ...quantities };
+            delete updatedQuantities[itemId];
+            setQuantities(updatedQuantities);
+
+            calculateSubtotal(updatedItems, updatedQuantities);
 
             setDeleteLoading(prev => ({ ...prev, [itemId]: false }));
 
-            // Update cartCount di header setelah hapus item
-            if (fetchCartCount) {
-                fetchCartCount();
+            // Immediately update cart count in header
+            if (decrementCartCount) {
+                decrementCartCount();
             }
         } catch (err) {
             console.error("Failed to remove item from cart", err);

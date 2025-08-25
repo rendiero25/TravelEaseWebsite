@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from '../contexts/AuthContext';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
 
 const statusOptions = [
     { value: "success", label: "Mark as Success" },
@@ -12,10 +12,12 @@ const statusOptions = [
 const TransactionManagement = () => {
     const { auth } = useAuth();
     const [transactions, setTransactions] = useState([]);
+    const [allTransactions, setAllTransactions] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
     const [updating, setUpdating] = useState({});
     const [successMsg, setSuccessMsg] = useState("");
 
@@ -25,8 +27,17 @@ const TransactionManagement = () => {
             return;
         }
         fetchTransactions();
-        // eslint-disable-next-line
-    }, [page]);
+    }, [auth.isLoggedIn, auth.user?.role]);
+
+    // Handle page changes for client-side pagination
+    useEffect(() => {
+        if (allTransactions.length > 0) {
+            const startIndex = (page - 1) * PAGE_SIZE;
+            const endIndex = startIndex + PAGE_SIZE;
+            const paginatedTransactions = allTransactions.slice(startIndex, endIndex);
+            setTransactions(paginatedTransactions);
+        }
+    }, [page, allTransactions]);
 
     const fetchTransactions = async () => {
         setLoading(true);
@@ -38,13 +49,37 @@ const TransactionManagement = () => {
                     'Authorization': `Bearer ${auth.token}`
                 }
             };
+
+            console.log("Fetching all transactions..."); // Debug logging
+
             const res = await axios.get(
                 `https://travel-journal-api-bootcamp.do.dibimbing.id/api/v1/all-transactions`,
                 config
             );
-            setTransactions(res.data.data || []);
-            setTotalPages(Math.ceil((res.data.count || 1) / PAGE_SIZE));
+
+            console.log("API Response:", res.data); // Debug logging
+
+            const fetchedTransactions = res.data.data || [];
+
+            // Sort transactions by creation date (newest first)
+            const sortedTransactions = fetchedTransactions.sort((a, b) => {
+                const dateA = new Date(a.createdAt);
+                const dateB = new Date(b.createdAt);
+                return dateB - dateA; // Descending order (newest first)
+            });
+
+            setAllTransactions(sortedTransactions);
+            setTotalItems(sortedTransactions.length);
+            setTotalPages(Math.ceil(sortedTransactions.length / PAGE_SIZE));
+
+            // Set initial page transactions (page 1)
+            const startIndex = (page - 1) * PAGE_SIZE;
+            const endIndex = startIndex + PAGE_SIZE;
+            const paginatedTransactions = sortedTransactions.slice(startIndex, endIndex);
+            setTransactions(paginatedTransactions);
+
         } catch (err) {
+            console.error("Fetch transactions error:", err);
             setError("Failed to fetch transactions");
         }
         setLoading(false);
@@ -67,7 +102,12 @@ const TransactionManagement = () => {
                 config
             );
             setSuccessMsg("Status updated successfully");
-            fetchTransactions();
+            // Reset to page 1 after status update to ensure we see the updated data
+            if (page !== 1) {
+                setPage(1);
+            } else {
+                fetchTransactions();
+            }
         } catch (err) {
             setError(err.response?.data?.errors?.[0]?.message || err.response?.data?.message || "Failed to update status");
         } finally {
@@ -128,7 +168,7 @@ const TransactionManagement = () => {
                                                 {statusOptions.map(opt => (
                                                     <button
                                                         key={opt.value}
-                                                        className={`px-3 py-1 rounded text-white text-xs font-semibold ${opt.value === "failed" ? "bg-red-500" : opt.value === "success" ? "bg-green-600" : "bg-blue-500"} disabled:opacity-50`}
+                                                        className={`px-3 py-1 cursor-pointer rounded text-white text-xs font-semibold ${opt.value === "failed" ? "bg-red-500" : opt.value === "success" ? "bg-green-600" : "bg-blue-500"} disabled:opacity-50`}
                                                         disabled={updating[tx.id]}
                                                         onClick={() => handleStatusUpdate(tx.id, opt.value)}
                                                         type="button"
@@ -146,23 +186,27 @@ const TransactionManagement = () => {
                 </table>
             </div>
             {/* Pagination */}
-            <div className="flex flex-row justify-center items-center gap-2 mt-6">
-                <button
-                    className="px-3 py-1 rounded bg-gray-200"
-                    disabled={page === 1}
-                    onClick={() => setPage(page - 1)}
-                >
-                    Prev
-                </button>
-                <span className="mx-2">{page} / {totalPages}</span>
-                <button
-                    className="px-3 py-1 rounded bg-gray-200"
-                    disabled={page === totalPages}
-                    onClick={() => setPage(page + 1)}
-                >
-                    Next
-                </button>
-            </div>
+            {totalPages > 1 && (
+                <div className="flex flex-row justify-center items-center gap-2 mt-6">
+                    <button
+                        className="px-4 py-2 cursor-pointer rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={page === 1 || loading}
+                        onClick={() => setPage(page - 1)}
+                    >
+                        Previous
+                    </button>
+                    <span className="mx-4 text-sm text-gray-600">
+                        Page {page} of {totalPages}
+                    </span>
+                    <button
+                        className="px-4 py-2 cursor-pointer rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={page === totalPages || loading}
+                        onClick={() => setPage(page + 1)}
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
