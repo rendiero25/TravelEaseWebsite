@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from '../contexts/AuthContext';
+import OnErrorBank from '../assets/images/bank.png';
 
 const PaymentMethodManagement = () => {
     const { auth } = useAuth(); // Pindahkan ke sini
@@ -72,14 +73,13 @@ const PaymentMethodManagement = () => {
                             className="flex flex-col items-center border rounded-lg shadow p-4 w-[18%] min-w-[180px] mb-4 bg-white"
                         >
                             <img
-                                src={m.logoUrl}
+                                src={m.logoUrl || OnErrorBank}
                                 alt={m.name}
                                 className="w-16 h-16 object-contain mb-2"
-                                onError={event => {
+                                onError={(event) => {
                                     event.target.onerror = null;
-                                    event.target.src = "https://s31799.pcdn.co/wp-content/uploads/2022/01/credit-icon-2022.png"}}
-                                
-                                
+                                    event.target.src = OnErrorBank;
+                                }}
                             />
 
                             <div className="font-semibold text-center">{m.name}</div>

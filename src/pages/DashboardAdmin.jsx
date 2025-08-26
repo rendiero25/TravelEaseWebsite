@@ -8,6 +8,7 @@ import ActivityManagement from "../components/ActivityManagement";
 import UserManagement from "../components/UserManagement";
 import TransactionManagement from "../components/TransactionManagement";
 import { useAuth } from "../contexts/AuthContext";
+import OnErrorImage from '../assets/images/onerrorimage.jpg';
 
 const DashboardAdmin = () => {
   const [tab, setTab] = useState(0);

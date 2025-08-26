@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from '../contexts/AuthContext';
+import OnErrorImage from '../assets/images/onerrorimage.jpg';
 
 const API_KEY = "24405e01-fbc1-45a5-9f5a-be13afcd757c";
 
@@ -185,10 +186,10 @@ const ActivityManagement = () => {
                             {row.map(activity => (
                                 <div key={activity.id} className="flex-1 min-w-[220px] bg-white rounded-lg border border-gray-200 p-4 flex flex-col">
                                     <img
-                                        src={activity.imageUrls?.[0] || "https://via.placeholder.com/400x180?text=No+Image"}
+                                        src={activity.imageUrls?.[0] || OnErrorImage}
                                         alt={activity.title}
                                         className="h-32 w-full object-cover rounded mb-2"
-                                        onError={e => { e.target.onerror = null; e.target.src = "https://via.placeholder.com/400x180?text=No+Image"; }}
+                                        onError={e => { e.target.onerror = null; e.target.src = OnErrorImage; }}
                                     />
                                     <div className="font-bold text-lg mb-1">{activity.title}</div>
                                     <div className="text-gray-600 text-sm mb-1">{activity.city}, {activity.province}</div>
